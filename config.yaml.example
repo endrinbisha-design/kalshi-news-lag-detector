@@ -1,0 +1,43 @@
+# ---------------------------------------------------------------------------
+# Optional config file. Copy to `config.yaml` (gitignored) to override defaults.
+# Anything set here takes precedence over environment variables for tuning
+# knobs (but NOT for secrets — keep secrets in .env / env vars only).
+# ---------------------------------------------------------------------------
+
+# Percentage-point gap between the LLM's estimated fair price and the market
+# price that triggers a "potential mispricing" flag.
+gap_threshold_pp: 5
+
+# Kalshi market categories to consider. These map most cleanly to news events.
+# Leave empty ([]) to consider ALL open markets.
+# Common Kalshi categories: Politics, Economics, Financials, Weather,
+# World, Science and Technology, Health, Climate.
+categories:
+  - Politics
+  - Economics
+  - Weather
+
+# Max number of open markets to pull/scan per run (keeps API + LLM cost sane).
+max_markets: 100
+
+# Only consider markets closing within this many days (near-term markets react
+# to news faster). Set to 0 to disable the filter.
+max_days_to_close: 30
+
+# --- News matching ---
+# How many keywords to pull from each market's title/description for matching.
+keywords_per_market: 8
+
+# Minimum number of distinct keyword hits for a news article to be considered
+# a candidate match worth sending to the LLM.
+min_keyword_hits: 2
+
+# How far back to search news, in hours.
+news_lookback_hours: 24
+
+# Max news articles to pull per market query (NewsAPI page size).
+news_page_size: 20
+
+# --- LLM scoring ---
+# Only flag when the LLM's confidence is at least this (0.0 - 1.0).
+min_confidence: 0.5

@@ -1,0 +1,31 @@
+# Secrets & credentials — NEVER commit these
+.env
+config.yaml
+config.yml
+*.pem
+*.key
+secrets/
+credentials/
+
+# Local data / output
+*.db
+*.sqlite
+*.sqlite3
+flagged_opportunities.db
+output/
+logs/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.mypy_cache/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
