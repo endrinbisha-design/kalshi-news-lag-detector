@@ -302,21 +302,27 @@ def main() -> int:
             dup_ok += half_up(a) == act
             sm = max((snap.get(d, {}).get(f"{h:02d}:51") for h in range(14, 20)
                       if snap.get(d, {}).get(f"{h:02d}:51") is not None), default=None)
+            # Only days where the group EXCEEDS every snapshot in its own window show the
+            # symptom that needs explaining. A day whose afternoon group equals the morning
+            # group AND equals a snapshot inside the afternoon window (e.g. the max sitting
+            # on the 2 PM boundary, as on 09-26) is a benign coincidence, not a candidate
+            # for carry-forward. Classifying those too inflated the "carried forward" count.
             if sm is not None and a > sm + 0.01:
                 dup_hi += 1
-            pk = log[ds].get("actual_high_time_lst")
-            if pk is None:
-                unknown += 1
-            elif 1400 <= int(pk) < 2000:
-                genuine += 1          # double-topped day: the equality is honest
-            else:
-                carried += 1
+                pk = log[ds].get("actual_high_time_lst")
+                if pk is None:
+                    unknown += 1
+                elif 1400 <= int(pk) < 2000:
+                    genuine += 1      # double-topped day: the equality is honest
+                else:
+                    carried += 1
         else:
             nondup += 1
             nondup_ok += half_up(a) == act
     print("AFTERNOON GROUP INDEPENDENCE")
     print(f"  duplicates the morning group exactly  {dup:>3}/{dup + nondup}   (UPPER BOUND)")
-    print(f"    ...and exceeds every snapshot in its own window  {dup_hi:>3}")
+    print(f"    ...and exceeds every snapshot in its own window  {dup_hi:>3}"
+          f"   <- only these need explaining")
     print(f"    classified by CLI peak time: carried forward {carried}, "
           f"genuine double-top {genuine}, unknown {unknown}")
     print(f"  afternoon group correct, duplicate days     {dup_ok:>3}/{dup}")
