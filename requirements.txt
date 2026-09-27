@@ -1,0 +1,17 @@
+# Kalshi News-Lag Detector — dependencies
+
+# HTTP
+requests>=2.31.0
+
+# Kalshi request signing (RSA-PSS / SHA-256)
+cryptography>=42.0.0
+
+# LLM scoring
+anthropic>=0.40.0
+
+# Config / env loading
+python-dotenv>=1.0.0
+PyYAML>=6.0.1
+
+# Nice console tables
+rich>=13.7.0
