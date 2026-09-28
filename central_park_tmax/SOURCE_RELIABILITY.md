@@ -1,6 +1,6 @@
 # Which source actually tells you the settlement, and when
 
-Measured over the 57 consecutive logged KNYC days, 2026-08-01 → 09-26
+Measured over the 58 consecutive logged KNYC days, 2026-08-01 → 09-27
 (`track_record/call_log.jsonl`). **Every number below is produced by
 `scripts/source_reliability.py`** — re-derived from the METAR archive on each run, never
 incremented by hand. Re-run it after adding a day and paste the output; do not edit the
@@ -13,21 +13,21 @@ quantisation section — are deliberately frozen at what was known when the call
 and should not be refreshed. Everything else tracks the latest run.
 
 This document exists because on 09-11 I claimed the preliminary CLI had beaten the
-six-hour group and that "the ordering is reversed." **Tested across all 57 days, that is
+six-hour group and that "the ordering is reversed." **Tested across all 58 days, that is
 wrong.** The groups are settlement-grade and the preliminary is not.
 
 ## The scoreboard
 
 | source | available | matches settlement |
 |---|---|---|
-| morning group (8 AM–2 PM) | 1:51 PM | 23/57 — **40 %** |
-| preliminary CLI | ~4:31–5:14 PM | 25/34 — **74 %** |
-| afternoon group (2 PM–8 PM) | 7:51 PM | 49/57 — **86 %** † |
-| **max of ALL same-day groups** | **7:51 PM** | **56/57 — 98 %** |
+| morning group (8 AM–2 PM) | 1:51 PM | 24/58 — **41 %** |
+| preliminary CLI | ~4:31–5:14 PM | 26/35 — **74 %** |
+| afternoon group (2 PM–8 PM) | 7:51 PM | 50/58 — **86 %** † |
+| **max of ALL same-day groups** | **7:51 PM** | **57/58 — 98 %** |
 
 † **That 86 % is partly a free ride — see "The afternoon group is not always an
-independent measurement" below.** On the 16 days where it repeats the morning group it
-scores 16/16; on the other 41 it scores 33/41 = 80 %. **The partition behind those two
+independent measurement" below.** On the 17 days where it repeats the morning group it
+scores 17/17; on the other 41 it scores 33/41 = 80 %. **The partition behind those two
 numbers is itself known to be wrong in at least one case, so treat 80 % as indicative
 rather than measured.**
 
@@ -35,7 +35,7 @@ rather than measured.**
 It originally read "max of both groups" and was computed from the morning and afternoon
 groups only. 2026-09-14 broke it: an overnight-max day settling at 75, where morning
 (73.04) and afternoon (73.94) both round to 74, while the **2 AM–8 AM group reads 75.02**
-and was never consulted. Across the 57 days, daytime-only would miss **two** — 08-27 and
+and was never consulted. Across the 58 days, daytime-only would miss **two** — 08-27 and
 09-14 — where all-same-day-groups misses one. The 98 % was under-specified, not wrong; two
 of three available groups were going in, and no earlier day in the run stressed it.
 
@@ -43,13 +43,13 @@ Read the timing column before the accuracy column; these are not competing at th
 hour.
 
 * **At 4:40 PM the preliminary is the best thing available** — 74 % against the morning
-  group's 40 %. That much of the 09-11 observation survives.
+  group's 41 %. That much of the 09-11 observation survives.
 * **Waiting until 7:51 PM beats it decisively.** Max of all same-day groups is 98 %. The claim that
   the preliminary supersedes the group was generalised from a single favourable day and
   does not hold.
 * The one failure of max-of-all-same-day-groups is **2026-08-27**, the sensor-contamination day
   where a 9-minute spike during heavy rain entered the group and the CLI's QC rejected it
-  (group 81, settled 77). That remains the only day in 57 where a group was wrong and the
+  (group 81, settled 77). That remains the only day in 58 where a group was wrong and the
   CLI right — so it is one exception, not a pattern, but it is the reason the 98 % is not
   100 %.
 
@@ -62,13 +62,13 @@ Day twenty-eight was a +2.
 
 | settled − preliminary | days | share |
 |---|---|---|
-| **+0 °F** | 25 | **74 %** |
-| **+1 °F** | 8 | **24 %** |
+| **+0 °F** | 26 | **74 %** |
+| **+1 °F** | 8 | **23 %** |
 | **+2 °F** | **1** | **3 %** |
 | negative | **0** | **0 %** |
 
 The nine misses are 08-03, 08-17, 08-25, 08-30, 09-01, 09-03, 09-06, 09-13 (all +1) and
-**09-20 (+2)**. The never-negative direction still holds at 34/34 — **but see the minimum
+**09-20 (+2)**. The never-negative direction still holds at 35/35 — **but see the minimum
 section below, which shows what that record does and does not protect against.**
 
 **The +2 is a different mechanism, not a bigger version of the +1.** On 09-20 the
@@ -95,9 +95,9 @@ integers above it**, known at ~4:40 PM:
 
 ```
 P(settle = preliminary)     ≈ 0.74
-P(settle = preliminary + 1) ≈ 0.24
-P(settle = preliminary + 2) ≈ 0.03     <- 1 day in 34, added 09-20
-P(settle < preliminary)     ≈ 0        (0/34, but see the caveat below)
+P(settle = preliminary + 1) ≈ 0.23
+P(settle = preliminary + 2) ≈ 0.03     <- 1 day in 35, added 09-20
+P(settle < preliminary)     ≈ 0        (0/35, but see the caveat below)
 ```
 
 The never-below half rests on a mechanism — the preliminary can only be *beaten* by what
@@ -139,12 +139,12 @@ Against real ladders:
 
 | | days | result |
 |---|---|---|
-| both integers in one bucket | 24/34 (71 %) | bucket correct **24/24** |
-| …of which the open-ended bucket | **6** | certainty is nearly free |
+| both integers in one bucket | 25/35 (71 %) | bucket correct **25/25** |
+| …of which the open-ended bucket | **7** | certainty is nearly free |
 | …**genuine 2-wide bucket** | **18** | **18/18 correct** |
-| integers straddle a boundary | 10/34 (29 %) | majority side won **9/10** |
+| integers straddle a boundary | 10/35 (29 %) | majority side won **9/10** |
 
-So the split flags a genuine narrow-bucket on **18 days in 34 — not 4 — and was right on
+So the split flags a genuine narrow-bucket on **18 days in 35 — not 4 — and was right on
 all eighteen.** The straddle days went 9/10 to the majority side, not 2/4.
 
 **But "near-certainty" was the wrong word, and 09-20's +2 shows why it was structurally
@@ -176,7 +176,8 @@ the 17:00 candle on the day (now derived by the script, see below):
 09-23  67-68  100c     09-24  66-67   98c     09-25  69-70  100c
 ```
 
-18/18 correct, mean ask **98.9 ¢**, ten of them at exactly 100 ¢. Net **+1.0 % per bet**,
+18/18 correct (09-27's preliminary sat in an open-ended bucket, so it is not in this list),
+mean ask **98.9 ¢**, ten of them at exactly 100 ¢. Net **+1.0 % per bet**,
 +$1.79 on eighteen $10 stakes, before any slippage or depth check. That is `EDGE_DECAY.md`
 again — the same wall `PRELIM_FALLING` hit at exactly $1.00, just a whisker above zero
 instead of on it.
@@ -210,7 +211,7 @@ It is not a one-off. Across the 49 days:
 
 | | days |
 |---|---|
-| afternoon group **exactly equals** the morning group | **16/57** — upper bound |
+| afternoon group **exactly equals** the morning group | **17/58** — upper bound |
 | …and also exceeds every snapshot inside its own window | **12** |
 
 Twelve exact ties, each landing precisely on the morning maximum, looked far more
@@ -543,6 +544,35 @@ basis for believing the market wrong at all.
 **Rule.** Score a 3:5x PM call against the candle **ending 16:00 local**, and label it as
 incomplete at call time. Better still, do not read an advance call's edge off any candle:
 by construction the market has one observation less than the call does.
+
+## A second zero-mass claim fell, for the same reason as the first — 2026-09-27
+
+On 09-20 the two-point distribution's "never +2" broke. On 09-27 a second absolute claim
+broke: the **equal subset had never shown a +0.0 excess** in 13 days, and day 14 was one.
+
+The subset is days whose 3:51 PM snapshot exactly equals the morning six-hour group. Those
+days had *always* gone on to exceed the group by at least +0.5 °C, and three consecutive
+correct point estimates (09-22, 09-23, 09-25) rested on it. 09-27 came in at exactly +0.0.
+
+**It is not dead, it is no longer absolute, and the difference is quantitative.** The
+overall +0.0 rate is 22/58 ≈ 38 %. Zero in thirteen against that base rate has probability
+0.62¹³ ≈ 0.2 %, so the effect was real and strong. One in fourteen ≈ 7 % is still far below
+38 %. The correct edit is **"never" → "rarely, roughly 1 in 14"** — the identical repair the
+two-point section needed a week earlier.
+
+**Two absolute claims, one week apart, both predicted in this document's own limits
+section, both stated in bold anyway.** The rule that keeps being relearned: a
+zero-observation count is not zero probability. Write "not observed in n days" and carry
+the interval.
+
+### The specific error it caused, which is worth more than the tally
+
+On 09-27 I used `0/13` as *literally zero* when forming the point estimate — and in the
+same write-up, for the market comparison, used its Wilson upper bound of 24 % to argue no
+edge existed. **Interval discipline applied to the market question and not to my own
+forecast.** The point estimate would still have been 64, but P(63) would have been ~7 %
+rather than unmentioned, and the call would not have listed `P(67+) 1 %` while omitting a
+more likely outcome on the other side. State the interval on both sides or on neither.
 
 ## Honest limits
 
