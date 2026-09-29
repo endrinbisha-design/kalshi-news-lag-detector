@@ -24,7 +24,7 @@
 
 ## Phase 2 — Two tracks (Track G: generalist S&T · Track D: vol trading)
 
-See `curriculum/phase2-syllabus.md`. Each day: prob/EV + brainteaser + a Track G lesson/quiz + a Track D lesson/quiz. Big quiz every 3rd day (Days 18, 21, 24…).
+See curriculum/phase2-syllabus.md. Each day: prob/EV + brainteaser + a Track G lesson/quiz + a Track D lesson/quiz. Big quiz every 3rd day (Days 18, 21, 24…).
 
 | Day | Track G | Track D | Prob/EV | G quiz | D quiz |
 |----:|---------|---------|:-------:|:------:|:------:|
@@ -38,7 +38,7 @@ See `curriculum/phase2-syllabus.md`. Each day: prob/EV + brainteaser + a Track G
 
 ## Phase 3 — Daily options drill + the Merton model
 
-See `curriculum/phase3-merton-syllabus.md`. Each day: 10 interview-style Black-Scholes/options questions + a Merton model lesson & quiz + a gamma exposure (GEX) lesson & quiz. Big cumulative quiz every 3rd day (Days 21, 24, 27).
+See curriculum/phase3-merton-syllabus.md. Each day: 10 interview-style Black-Scholes/options questions + a Merton model lesson & quiz + a gamma exposure (GEX) lesson & quiz. Big cumulative quiz every 3rd day (Days 21, 24, 27).
 
 | Day | Date | Merton lesson | Gamma exposure lesson | Options drill | Merton quiz | GEX quiz |
 |----:|------|---------------|-----------------------|:-------------:|:-----------:|:--------:|
@@ -48,5 +48,5 @@ See `curriculum/phase3-merton-syllabus.md`. Each day: 10 interview-style Black-S
 **Next big quiz:** Day 21 (covers Days 19–21, both tracks).
 
 **Standalone quizzes:**
-- `quizzes/options-comprehensive-quiz-1.md` — big review of Days 1–11 + options strategies (interview-style). Score: ___ / 32.
-- `quizzes/black-scholes-refresher-test.md` — theory-only refresher test on the whole BS model (foundations → pricing → Greeks → implied vol). Score: ___ / 24.
+- quizzes/options-comprehensive-quiz-1.md — big review of Days 1–11 + options strategies (interview-style). Score: ___ / 32.
+- quizzes/black-scholes-refresher-test.md — theory-only refresher test on the whole BS model (foundations → pricing → Greeks → implied vol). Score: ___ / 24.

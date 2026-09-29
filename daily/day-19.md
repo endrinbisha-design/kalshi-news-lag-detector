@@ -63,7 +63,7 @@ Bondholders get **min(V_T, F) = F − max(F − V_T, 0)**. So
 
 > **D = F·e^(−rT) − Put(V, F)**
 
-Risky debt means **being long a Treasury and short a put on the firm's assets to the shareholders.** That put is the value of the default option, the equity holders' right to walk away. And **V = E + D** is just put-call parity: `Call + (F·e^(−rT) − Put) = V`.
+Risky debt means **being long a Treasury and short a put on the firm's assets to the shareholders.** That put is the value of the default option, the equity holders' right to walk away. And **V = E + D** is just put-call parity: Call + (F·e^(−rT) − Put) = V.
 
 **4. Worked example.**
 V = 100, F = 80, T = 1, r = 5%, σ_V = 20%.
@@ -105,15 +105,15 @@ Same firm, σ_V = 40%: E ≈ **$28.98** (up), D ≈ **$71.02** (down), spread �
 You know gamma as the Greek: how much delta changes per $1 move in the stock. **Gamma exposure** takes that to the level of a whole book, or of the whole market. It asks: *when the underlying moves 1%, how many dollars of stock must the holders of these options buy or sell to stay delta-hedged?* Desks and strategists use it to reason about **hedging flows**, and interviewers increasingly ask about it ("what does it mean that dealers are short gamma?").
 
 **1. Share gamma → dollar gamma.**
-Per-share gamma Γ tells you Δ changes by Γ per $1. A 1% move is `0.01·S` dollars, so per option-share delta changes by `Γ·0.01·S` shares, which is worth `Γ·0.01·S²` dollars of stock. For a position:
+Per-share gamma Γ tells you Δ changes by Γ per $1. A 1% move is 0.01·S dollars, so per option-share delta changes by Γ·0.01·S shares, which is worth Γ·0.01·S² dollars of stock. For a position:
 
 > **Dollar gamma (per 1% move) = Γ × S² × 0.01 × (contracts × multiplier)**
 
 This is the standard definition of **GEX**: the dollar value of stock that must trade to rebalance the hedge after a 1% move.
 
 *Worked example.* S = $100, Γ = 0.04 per share, you hold 10,000 contracts (× 100 = 1,000,000 option-shares).
-`GEX = 0.04 × 100² × 0.01 × 1,000,000 = **$4,000,000 per 1% move**`.
-Check it directly: a $1 (1%) move changes delta by `0.04 × 1,000,000 = 40,000` shares = $4mm at $100. ✓
+GEX = 0.04 × 100² × 0.01 × 1,000,000 = **$4,000,000 per 1% move**.
+Check it directly: a $1 (1%) move changes delta by 0.04 × 1,000,000 = 40,000 shares = $4mm at $100. ✓
 
 **2. Sign = direction of the hedge flow.** ⭐
 - **Long gamma** (you own options): the stock rises → your delta rises → you **sell** stock to re-hedge; it falls → you **buy**. You trade **against** the move: buy low, sell high.
@@ -121,15 +121,15 @@ Check it directly: a $1 (1%) move changes delta by `0.04 × 1,000,000 = 40,000` 
 In the example, if you were *short* those options, a 1% rally forces you to buy **$4mm** of stock, and a 1% drop forces you to sell $4mm.
 
 **3. Why it matters beyond your own P&L.**
-Recall the P&L of a hedged position: `≈ ½·Γ·(ΔS)²` (long gamma gains on any move, short gamma loses). For the example, a $2 move gives `½ × 0.04 × 1,000,000 × 2² = $80,000` of gamma P&L (a gain if long, a loss if short). When the **dealers** who make markets in options are collectively on one side, their re-hedging becomes a market-wide flow:
+Recall the P&L of a hedged position: ≈ ½·Γ·(ΔS)² (long gamma gains on any move, short gamma loses). For the example, a $2 move gives ½ × 0.04 × 1,000,000 × 2² = $80,000 of gamma P&L (a gain if long, a loss if short). When the **dealers** who make markets in options are collectively on one side, their re-hedging becomes a market-wide flow:
 - Dealers **net long gamma** → their hedging **dampens** moves (lower realized vol, mean reversion).
 - Dealers **net short gamma** → their hedging **amplifies** moves (higher realized vol, trending, gap risk).
 Lessons 2–3 build this into the market-level GEX picture and the "gamma flip".
 
 **4. Where gamma lives: strike and expiry.**
-Gamma is largest **at the money** and **near expiry**. ATM, `Γ ≈ φ(d₁)/(S·σ·√T) ≈ 0.4/(S·σ·√T)`:
-- S = 100, σ = 20%, 1 year: `Γ ≈ 0.4/20 = 0.020`.
-- Same option with 1 week left: `Γ ≈ 0.4/(100 × 0.2 × √(1/52)) ≈ 0.144`, about **7× larger** (`√52 ≈ 7.2`).
+Gamma is largest **at the money** and **near expiry**. ATM, Γ ≈ φ(d₁)/(S·σ·√T) ≈ 0.4/(S·σ·√T):
+- S = 100, σ = 20%, 1 year: Γ ≈ 0.4/20 = 0.020.
+- Same option with 1 week left: Γ ≈ 0.4/(100 × 0.2 × √(1/52)) ≈ 0.144, about **7× larger** (√52 ≈ 7.2).
 So short-dated ATM open interest carries most of the GEX, which is why expiry weeks and 0DTE options get so much attention. Also note GEX scales with **S²**, so compare dollar gamma, not raw Γ, across underlyings.
 
 **5. Calls and puts have the same gamma.**
@@ -154,59 +154,59 @@ At the same strike and expiry, a call and a put have identical Γ (put-call pari
 ## Part 1 — Options & Black-Scholes Drill
 
 **A1. Call ≈ $8.00; put ≈ $8.00.**
-ATM shortcut: `C ≈ 0.4·S·σ·√T = 0.4·100·0.2·1 = 8.0` (exact BS: 7.97). With r = 0 and K = S, parity gives `C − P = S − K = 0`, so the put is the same.
+ATM shortcut: C ≈ 0.4·S·σ·√T = 0.4·100·0.2·1 = 8.0 (exact BS: 7.97). With r = 0 and K = S, parity gives C − P = S − K = 0, so the put is the same.
 
 **A2. Yes, lock in $2.**
-Parity with r = 0: `C − P = S − K = 0`, but the market has `C − P = 2`. The call is rich relative to the put. **Sell the call, buy the put, buy the stock** (a conversion): collect 5, pay 3, pay 50 = net −48. At expiry the stock is delivered at 50 either way (the put or the short call makes sure of that), so you receive 50. **Riskless profit $2.**
+Parity with r = 0: C − P = S − K = 0, but the market has C − P = 2. The call is rich relative to the put. **Sell the call, buy the put, buy the stock** (a conversion): collect 5, pay 3, pay 50 = net −48. At expiry the stock is delivered at 50 either way (the put or the short call makes sure of that), so you receive 50. **Riskless profit $2.**
 
 **A3. Above 0.5, about 0.54.**
-`d₁ = [ln(S/K) + σ²T/2]/(σ√T) = σ√T/2 = 0.10` → `N(0.10) ≈ 0.54`. The lognormal drift term (+σ²/2) pushes d₁ positive. (With r = 5%, d₁ = 0.35 and delta ≈ 0.64.)
+d₁ = [ln(S/K) + σ²T/2]/(σ√T) = σ√T/2 = 0.10 → N(0.10) ≈ 0.54. The lognormal drift term (+σ²/2) pushes d₁ positive. (With r = 5%, d₁ = 0.35 and delta ≈ 0.64.)
 
 **A4. ≈ +$0.075.**
-Gamma P&L: `½·Γ·(ΔS)² = ½·0.05·4 = $0.10`. Theta is what you pay for the priced-in ~1% move ($1): `½·0.05·1² = $0.025`. Net ≈ **+$0.075**. The stock moved 2× the breakeven, so you earn 4× the theta, minus the theta.
+Gamma P&L: ½·Γ·(ΔS)² = ½·0.05·4 = $0.10. Theta is what you pay for the priced-in ~1% move ($1): ½·0.05·1² = $0.025. Net ≈ **+$0.075**. The stock moved 2× the breakeven, so you earn 4× the theta, minus the theta.
 
 **A5. ≈ $0.52.**
-The digital is the limit of a tight call spread: `(C(100) − C(101))/1 = 10.45 − 9.93 = 0.52`. Formally a digital = `−∂C/∂K = e^(−rT)·N(d₂)` (at K = 100.5 that's also ≈ 0.52). So a digital is a vertical call spread with tiny width and large notional, which is why digitals are skew-sensitive.
+The digital is the limit of a tight call spread: (C(100) − C(101))/1 = 10.45 − 9.93 = 0.52. Formally a digital = −∂C/∂K = e^(−rT)·N(d₂) (at K = 100.5 that's also ≈ 0.52). So a digital is a vertical call spread with tiny width and large notional, which is why digitals are skew-sensitive.
 
 **A6. 1y ≈ $0.40/vol pt; 1m ≈ $0.115/vol pt; ~3.5× more for the 1-year.**
-ATM vega ≈ `0.4·S·√T` per unit of vol → per 1 point: `0.4·100·1·0.01 = 0.40`; 1-month: `0.4·100·√(1/12)·0.01 ≈ 0.115`. Vega scales with **√T**, so the ratio is `√12 ≈ 3.46`. (Gamma is the opposite: short-dated options carry more gamma.)
+ATM vega ≈ 0.4·S·√T per unit of vol → per 1 point: 0.4·100·1·0.01 = 0.40; 1-month: 0.4·100·√(1/12)·0.01 ≈ 0.115. Vega scales with **√T**, so the ratio is √12 ≈ 3.46. (Gamma is the opposite: short-dated options carry more gamma.)
 
 **A7. Call: never. Put: sometimes.**
 Call: exercising early gives up the remaining time value and pays K earlier than needed (you lose interest on K), so the call is worth more alive (or sell it). American call = European call with no dividends. Put: deep ITM, exercising gets you K *now* and the interest on K can outweigh the small remaining optionality, so early exercise can be optimal.
 
 **A8. ≈ $10; expected absolute move ≈ ±$10 (10%).**
-Straddle ≈ `0.8·S·σ·√T = 0.8·100·0.25·0.5 = 10.0` (exact 9.97). The straddle price ≈ the market's **expected absolute move** (`E|ΔS| = √(2/π)·σ√T·S ≈ 0.8σ√T·S`), so ≈ ±$10 by expiry.
+Straddle ≈ 0.8·S·σ·√T = 0.8·100·0.25·0.5 = 10.0 (exact 9.97). The straddle price ≈ the market's **expected absolute move** (E|ΔS| = √(2/π)·σ√T·S ≈ 0.8σ√T·S), so ≈ ±$10 by expiry.
 
 **A9. Not possible: lower bound is $14.39.**
-`C ≥ S − K·e^(−rT) = 100 − 90e^(−0.05) = 100 − 85.61 = 14.39`. Trade: **buy the call at 12, short the stock at 100, invest $88** at r (it grows to $92.51). At expiry: if S_T > 90, exercise, pay 90 and return the share → keep 2.51. If S_T ≤ 90, buy the share back at S_T ≤ 90 → keep ≥ 2.51. **Riskless ≥ $2.51 at T** (= 2.39 today).
+C ≥ S − K·e^(−rT) = 100 − 90e^(−0.05) = 100 − 85.61 = 14.39. Trade: **buy the call at 12, short the stock at 100, invest $88** at r (it grows to $92.51). At expiry: if S_T > 90, exercise, pay 90 and return the share → keep 2.51. If S_T ≤ 90, buy the share back at S_T ≤ 90 → keep ≥ 2.51. **Riskless ≥ $2.51 at T** (= 2.39 today).
 
 **A10. Θ = −$9/year ≈ −$0.025/day.**
-With r = 0 the BS PDE gives `Θ + ½σ²S²Γ = 0` → `Θ = −½·0.09·10,000·0.02 = −9` per year; `/365 ≈ −0.0247` per day. Long gamma means paying theta, and the PDE says exactly how much.
+With r = 0 the BS PDE gives Θ + ½σ²S²Γ = 0 → Θ = −½·0.09·10,000·0.02 = −9 per year; /365 ≈ −0.0247 per day. Long gamma means paying theta, and the PDE says exactly how much.
 
 ## Part 2 — Merton Quiz
 
-**LA1.** A **European call on the firm's assets V**, struck at the **face value of the debt F**, expiring at the debt maturity T. Payoff `max(V_T − F, 0)`.
+**LA1.** A **European call on the firm's assets V**, struck at the **face value of the debt F**, expiring at the debt maturity T. Payoff max(V_T − F, 0).
 
-**LA2.** `D = F·e^(−rT) − Put(V, F, T)`: a riskless bond minus a put on the firm's assets. **Shareholders are long the put** (bondholders are short it). That's the limited-liability right to hand over the assets instead of paying F.
+**LA2.** D = F·e^(−rT) − Put(V, F, T): a riskless bond minus a put on the firm's assets. **Shareholders are long the put** (bondholders are short it). That's the limited-liability right to hand over the assets instead of paying F.
 
-**LA3.** `N(−d₂)`, the risk-neutral probability that `V_T < F`. (Under the physical measure you'd replace r with the asset's real drift μ.)
+**LA3.** N(−d₂), the risk-neutral probability that V_T < F. (Under the physical measure you'd replace r with the asset's real drift μ.)
 
 **LA4.** **Equity up, debt down, spread wider.** V is unchanged, so value just shifts from bondholders to shareholders. Equity is long a call (long vega) and debt is short a put (short vega). Bondholders are hurt because shareholders control the firm's risk-taking and gain from raising it (**asset substitution**). That's why covenants exist. (Example: σ_V 20% → 40% moves ≈ $4.39 from debt to equity, and the spread goes from ~91bp to ~690bp.)
 
 **LA5. D ≈ $75.41; put ≈ $0.69; spread ≈ 91bp.**
-`D = V − E = 100 − 24.59 = 75.41`. Riskless debt = `80e^(−0.05) = 76.10`, so the put = `76.10 − 75.41 ≈ 0.69`. Yield = `−ln(75.41/80) ≈ 5.91%` → spread ≈ `5.91% − 5.00% ≈ 91bp`.
+D = V − E = 100 − 24.59 = 75.41. Riskless debt = 80e^(−0.05) = 76.10, so the put = 76.10 − 75.41 ≈ 0.69. Yield = −ln(75.41/80) ≈ 5.91% → spread ≈ 5.91% − 5.00% ≈ 91bp.
 
 ## Part 3 — GEX Quiz
 
-**GA1.** `GEX = Γ × S² × 0.01 × (number of contracts × multiplier)`: the dollars of stock traded to re-hedge per 1% move.
+**GA1.** GEX = Γ × S² × 0.01 × (number of contracts × multiplier): the dollars of stock traded to re-hedge per 1% move.
 
 **GA2. −$1,000,000 per 1%; buy about $1mm of stock.**
-`0.02 × 100² × 0.01 × (5,000 × 100) = 0.02 × 100 × 500,000 = $1,000,000`, negative because you're short. After a 1% rally your delta is 10,000 shares shorter (`0.02 × $1 × 500,000`), so you **buy ~10,000 shares ≈ $1mm**. You're buying into strength.
+0.02 × 100² × 0.01 × (5,000 × 100) = 0.02 × 100 × 500,000 = $1,000,000, negative because you're short. After a 1% rally your delta is 10,000 shares shorter (0.02 × $1 × 500,000), so you **buy ~10,000 shares ≈ $1mm**. You're buying into strength.
 
 **GA3.** Long gamma: as price rises their delta grows, so they sell into rallies and buy dips, which leans against the move. Short gamma: as price rises they get shorter, so they must buy into rallies and sell into declines, which pushes in the direction of the move.
 
 **GA4. ≈ 0.069, about 3.5× larger.**
-ATM gamma scales with `1/√T`: `0.02 × √12 ≈ 0.02 × 3.46 ≈ 0.069`. As expiry approaches, delta for near-ATM options swings between 0 and 1 over a narrower price range.
+ATM gamma scales with 1/√T: 0.02 × √12 ≈ 0.02 × 3.46 ≈ 0.069. As expiry approaches, delta for near-ATM options swings between 0 and 1 over a narrower price range.
 
 ---
 
