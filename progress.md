@@ -30,9 +30,10 @@ See `curriculum/phase2-syllabus.md`. Each day: prob/EV + brainteaser + a Track G
 |----:|---------|---------|:-------:|:------:|:------:|
 | 16 | Market-making & microstructure | The vol surface in depth | ___ / 5 | ___ / 4 | ___ / 4 |
 | 17 | The macro map ("what's your view") | Variance & volatility swaps | ___ / 5 | ___ / 4 | ___ / 4 |
+| 18 | Rates & fixed income I (curve, duration, DV01) | Correlation & dispersion | ___ / 6 | ___ / 4 | ___ / 4 · big quiz ___ / 12 |
 
-**Current position:** Day 17 complete → next is Day 18 (Track G: rates & fixed income I · Track D: correlation & dispersion) + big quiz.
-**Next big quiz:** Day 18 (covers Days 16–18, both tracks).
+**Current position:** Day 18 complete (big quiz done) → next is Day 19 (Track G: FX · Track D: relative-value vol).
+**Next big quiz:** Day 21 (covers Days 19–21, both tracks).
 
 **Standalone quizzes:**
 - `quizzes/options-comprehensive-quiz-1.md` — big review of Days 1–11 + options strategies (interview-style). Score: ___ / 32.
