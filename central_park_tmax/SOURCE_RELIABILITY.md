@@ -13,43 +13,48 @@ quantisation section — are deliberately frozen at what was known when the call
 and should not be refreshed. Everything else tracks the latest run.
 
 This document exists because on 09-11 I claimed the preliminary CLI had beaten the
-six-hour group and that "the ordering is reversed." **Tested across all 58 days, that is
+six-hour group and that "the ordering is reversed." **Tested across all 59 days, that is
 wrong.** The groups are settlement-grade and the preliminary is not.
 
 ## The scoreboard
 
 | source | available | matches settlement |
 |---|---|---|
-| morning group (8 AM–2 PM) | 1:51 PM | 24/58 — **41 %** |
-| preliminary CLI | ~4:31–5:14 PM | 26/35 — **74 %** |
-| afternoon group (2 PM–8 PM) | 7:51 PM | 50/58 — **86 %** † |
-| **max of ALL same-day groups** | **7:51 PM** | **57/58 — 98 %** |
+| morning group (8 AM–2 PM) | 1:51 PM | 24/59 — **41 %** |
+| preliminary CLI | ~4:31–5:14 PM ‡ | 27/36 — **75 %** |
+| afternoon group (2 PM–8 PM) | 7:51 PM | 51/59 — **86 %** † |
+| **max of ALL same-day groups** | **7:51 PM** | **58/59 — 98 %** |
+
+‡ **Not always.** On 2026-09-28 the preliminary was issued at **9:41 PM**, absent from
+both api.weather.gov and IEM AFOS through 5:47 PM — a real absence, not a feed miss. It
+still carried "VALID TODAY AS OF 0400 PM" and still counts as a preliminary. Anything that
+assumes the preliminary is in hand by ~5:15 PM now has one counterexample in 36.
 
 † **That 86 % is partly a free ride — see "The afternoon group is not always an
 independent measurement" below.** On the 17 days where it repeats the morning group it
-scores 17/17; on the other 41 it scores 33/41 = 80 %. **The partition behind those two
-numbers is itself known to be wrong in at least one case, so treat 80 % as indicative
+scores 17/17; on the other 42 it scores 34/42 = 81 %. **The partition behind those two
+numbers is itself known to be wrong in at least one case, so treat 81 % as indicative
 rather than measured.**
 
 **That last row says "all same-day groups" for a reason, and the wording is a correction.**
 It originally read "max of both groups" and was computed from the morning and afternoon
 groups only. 2026-09-14 broke it: an overnight-max day settling at 75, where morning
 (73.04) and afternoon (73.94) both round to 74, while the **2 AM–8 AM group reads 75.02**
-and was never consulted. Across the 58 days, daytime-only would miss **two** — 08-27 and
+and was never consulted. Across the 59 days, daytime-only would miss **two** — 08-27 and
 09-14 — where all-same-day-groups misses one. The 98 % was under-specified, not wrong; two
 of three available groups were going in, and no earlier day in the run stressed it.
 
 Read the timing column before the accuracy column; these are not competing at the same
 hour.
 
-* **At 4:40 PM the preliminary is the best thing available** — 74 % against the morning
+* **At 4:40 PM the preliminary is the best thing available** — 75 % against the morning
   group's 41 %. That much of the 09-11 observation survives.
 * **Waiting until 7:51 PM beats it decisively.** Max of all same-day groups is 98 %. The claim that
   the preliminary supersedes the group was generalised from a single favourable day and
   does not hold.
 * The one failure of max-of-all-same-day-groups is **2026-08-27**, the sensor-contamination day
   where a 9-minute spike during heavy rain entered the group and the CLI's QC rejected it
-  (group 81, settled 77). That remains the only day in 58 where a group was wrong and the
+  (group 81, settled 77). That remains the only day in 59 where a group was wrong and the
   CLI right — so it is one exception, not a pattern, but it is the reason the 98 % is not
   100 %.
 
@@ -62,13 +67,13 @@ Day twenty-eight was a +2.
 
 | settled − preliminary | days | share |
 |---|---|---|
-| **+0 °F** | 26 | **74 %** |
-| **+1 °F** | 8 | **23 %** |
+| **+0 °F** | 27 | **75 %** |
+| **+1 °F** | 8 | **22 %** |
 | **+2 °F** | **1** | **3 %** |
 | negative | **0** | **0 %** |
 
 The nine misses are 08-03, 08-17, 08-25, 08-30, 09-01, 09-03, 09-06, 09-13 (all +1) and
-**09-20 (+2)**. The never-negative direction still holds at 35/35 — **but see the minimum
+**09-20 (+2)**. The never-negative direction still holds at 36/36 — **but see the minimum
 section below, which shows what that record does and does not protect against.**
 
 **The +2 is a different mechanism, not a bigger version of the +1.** On 09-20 the
@@ -80,7 +85,7 @@ preliminary measuring a different part of the day altogether. **Rain-clearing ev
 warm advection are their own mode, and autumn produces more of them, not fewer.**
 
 The split has read 63/37, 65/35, 62/38, 64/36, 65/35, 67/33, 68/32, 69/31, 70/30, 68/29/4
-and now **69/28/3** across eleven successive days. Quote it from the script, never from memory — and
+then **69/28/3** across eleven successive days, and has since drifted to **75/22/3** (36 preliminaries, through 09-28). Quote it from the script, never from memory — and
 note that the thing which had "held across all nine" was exactly the thing that broke.
 
 **Read this as a lesson about the shape of the claim, not just the numbers.** A
@@ -94,10 +99,10 @@ So the preliminary gives a **one-sided distribution over the preliminary and the
 integers above it**, known at ~4:40 PM:
 
 ```
-P(settle = preliminary)     ≈ 0.74
-P(settle = preliminary + 1) ≈ 0.23
-P(settle = preliminary + 2) ≈ 0.03     <- 1 day in 35, added 09-20
-P(settle < preliminary)     ≈ 0        (0/35, but see the caveat below)
+P(settle = preliminary)     ≈ 0.75
+P(settle = preliminary + 1) ≈ 0.22
+P(settle = preliminary + 2) ≈ 0.03     <- 1 day in 36, added 09-20
+P(settle < preliminary)     ≈ 0        (0/36, but see the caveat below)
 ```
 
 The never-below half rests on a mechanism — the preliminary can only be *beaten* by what
@@ -139,12 +144,12 @@ Against real ladders:
 
 | | days | result |
 |---|---|---|
-| both integers in one bucket | 25/35 (71 %) | bucket correct **25/25** |
-| …of which the open-ended bucket | **7** | certainty is nearly free |
+| both integers in one bucket | 26/36 (72 %) | bucket correct **26/26** |
+| …of which the open-ended bucket | **8** | certainty is nearly free |
 | …**genuine 2-wide bucket** | **18** | **18/18 correct** |
-| integers straddle a boundary | 10/35 (29 %) | majority side won **9/10** |
+| integers straddle a boundary | 10/36 (28 %) | majority side won **9/10** |
 
-So the split flags a genuine narrow-bucket on **18 days in 35 — not 4 — and was right on
+So the split flags a genuine narrow-bucket on **18 days in 36 — not 4 — and was right on
 all eighteen.** The straddle days went 9/10 to the majority side, not 2/4.
 
 **But "near-certainty" was the wrong word, and 09-20's +2 shows why it was structurally
@@ -211,7 +216,7 @@ It is not a one-off. Across the 49 days:
 
 | | days |
 |---|---|
-| afternoon group **exactly equals** the morning group | **17/58** — upper bound |
+| afternoon group **exactly equals** the morning group | **17/59** — upper bound |
 | …and also exceeds every snapshot inside its own window | **12** |
 
 Twelve exact ties, each landing precisely on the morning maximum, looked far more
@@ -273,7 +278,7 @@ be quoted as a measurement. Reading it from the final product does not help when
 products carry the same wrong time.
 
 The broader observation, worth stating once: **every field in the CLI except the max and min
-values has now proved unreliable** — issuance time varies over 4:31–5:14 PM, peak time can
+values has now proved unreliable** — issuance time varies over 4:31–5:14 PM (and once, 09-28, 9:41 PM), peak time can
 be wrong by hours, and the preliminary's own value can miss by up to +2. The values settle
 the market and are the only part that has earned trust.
 
@@ -573,6 +578,34 @@ edge existed. **Interval discipline applied to the market question and not to my
 forecast.** The point estimate would still have been 64, but P(63) would have been ~7 %
 rather than unmentioned, and the call would not have listed `P(67+) 1 %` while omitting a
 more likely outcome on the other side. State the interval on both sides or on neither.
+
+## "Banked" means every reading, not every hourly reading — 2026-09-28
+
+The 3:51 PM call treats the day's maximum so far as banked and asks how much more the
+afternoon will add. On 09-28 the banked figure was taken as 16.1 °C, the morning group and
+the 15:51 hourly snapshot. **A SPECI at 3:38 PM had already read 16.7 °C = 62.06 °F**, in
+the same aviationweather response the hourly obs came from. The trace pull kept only the
+`:51` rows.
+
+So the call asked "will the day add +0.5 °C?" about something that had already happened.
+It was still right — point estimate 62, settled 62, and the afternoon group came in at
+exactly 16.7 °C (+0.6, on the lattice, the gap's seventh named test survived) — but it was
+right about the future when the answer was already in the past. That is the 09-16 lesson
+again, and this time the evidence was in a response I had fetched and not read.
+
+Two consequences:
+
+* **Banked = max(hourly, SPECI, groups) at call time.** SPECIs are irregular but they are
+  real observations of the continuous trace.
+* **The SPECI fed the six-hour group.** The group read 16.7 °C while every hourly
+  snapshot in its window read 16.1. That is direct confirmation that the group reads the
+  continuous trace rather than the hourly lattice, and it is how the SPECIs should be
+  thought of: partial, early sightings of the value the group will report.
+
+The conditional statistic (afternoon group minus 15:51 snapshot) is still correctly defined
+on the hourly ob and is not changed by this. What changes is the question put to it: it is
+the distribution of *what exceeds the 15:51 ob*, and when a SPECI has already exceeded it,
+part of that distribution has been realised and must be conditioned out.
 
 ## Honest limits
 
