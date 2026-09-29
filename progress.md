@@ -38,14 +38,14 @@ See `curriculum/phase2-syllabus.md`. Each day: prob/EV + brainteaser + a Track G
 
 ## Phase 3 — Daily options drill + the Merton model
 
-See `curriculum/phase3-merton-syllabus.md`. Each day: 10 interview-style Black-Scholes/options questions + a Merton model lesson + lesson quiz. Big cumulative quiz every 3rd day (Days 21, 24, 27).
+See `curriculum/phase3-merton-syllabus.md`. Each day: 10 interview-style Black-Scholes/options questions + a Merton model lesson & quiz + a gamma exposure (GEX) lesson & quiz. Big cumulative quiz every 3rd day (Days 21, 24, 27).
 
-| Day | Date | Merton lesson | Options drill | Quiz |
-|----:|------|---------------|:-------------:|:----:|
-| 19 | 2026-09-29 | Equity as a call on the firm | ___ / 10 | ___ / 5 |
+| Day | Date | Merton lesson | Gamma exposure lesson | Options drill | Merton quiz | GEX quiz |
+|----:|------|---------------|-----------------------|:-------------:|:-----------:|:--------:|
+| 19 | 2026-09-29 | Equity as a call on the firm | From gamma to GEX | ___ / 10 | ___ / 5 | ___ / 4 |
 
-**Current position:** Day 19 complete → next is Day 20 (Merton 2: backing out firm value & asset vol).
-**Next big quiz:** Day 21 (covers Days 19–21).
+**Current position:** Day 19 complete → next is Day 20 (Merton 2: backing out firm value & asset vol · GEX 2: dealer positioning & market GEX).
+**Next big quiz:** Day 21 (covers Days 19–21, both tracks).
 
 **Standalone quizzes:**
 - `quizzes/options-comprehensive-quiz-1.md` — big review of Days 1–11 + options strategies (interview-style). Score: ___ / 32.

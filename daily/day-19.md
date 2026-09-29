@@ -1,6 +1,6 @@
-# Day 19 — 2026-09-29  ·  Phase 3, Day 1 (Options drill + Merton model)
+# Day 19 — 2026-09-29  ·  Phase 3, Day 1 (Options drill + Merton model + Gamma exposure)
 
-New format: **10 interview-style Black-Scholes/options questions**, then a **Merton model lesson** and quiz. Work top-to-bottom; **answers with explanations are at the very end.**
+New format: **10 interview-style Black-Scholes/options questions**, then a **Merton model lesson** and a **gamma exposure lesson**, each with its own quiz. Work top-to-bottom; **answers with explanations are at the very end.**
 
 Unless stated otherwise: European options on a non-dividend stock, continuous compounding.
 
@@ -88,13 +88,61 @@ Same firm, σ_V = 40%: E ≈ **$28.98** (up), D ≈ **$71.02** (down), spread �
 
 ---
 
-## Part 3 — Lesson Quiz
+### Merton Quiz
 
 **LQ1.** In the Merton model, what option is equity, and what's the underlying and strike?
 **LQ2.** Write risky debt as a combination of a riskless bond and an option. Who is long the option?
 **LQ3.** Which Merton-model expression gives the risk-neutral probability of default?
 **LQ4.** Firm asset vol increases while V is unchanged. What happens to equity value, debt value, and the credit spread? Why is that a problem for bondholders?
 **LQ5.** V = 100, F = 80, r = 5%, T = 1. Equity is worth $24.59. What is the debt worth, what is the value of the default put, and what's the approximate credit spread?
+
+---
+
+## Part 3 — Gamma Exposure Lesson 1
+
+### From an option's gamma to "gamma exposure" (GEX)
+
+You know gamma as the Greek: how much delta changes per $1 move in the stock. **Gamma exposure** takes that to the level of a whole book, or of the whole market. It asks: *when the underlying moves 1%, how many dollars of stock must the holders of these options buy or sell to stay delta-hedged?* Desks and strategists use it to reason about **hedging flows**, and interviewers increasingly ask about it ("what does it mean that dealers are short gamma?").
+
+**1. Share gamma → dollar gamma.**
+Per-share gamma Γ tells you Δ changes by Γ per $1. A 1% move is `0.01·S` dollars, so per option-share delta changes by `Γ·0.01·S` shares, which is worth `Γ·0.01·S²` dollars of stock. For a position:
+
+> **Dollar gamma (per 1% move) = Γ × S² × 0.01 × (contracts × multiplier)**
+
+This is the standard definition of **GEX**: the dollar value of stock that must trade to rebalance the hedge after a 1% move.
+
+*Worked example.* S = $100, Γ = 0.04 per share, you hold 10,000 contracts (× 100 = 1,000,000 option-shares).
+`GEX = 0.04 × 100² × 0.01 × 1,000,000 = **$4,000,000 per 1% move**`.
+Check it directly: a $1 (1%) move changes delta by `0.04 × 1,000,000 = 40,000` shares = $4mm at $100. ✓
+
+**2. Sign = direction of the hedge flow.** ⭐
+- **Long gamma** (you own options): the stock rises → your delta rises → you **sell** stock to re-hedge; it falls → you **buy**. You trade **against** the move: buy low, sell high.
+- **Short gamma** (you sold options): the stock rises → you're shorter delta → you must **buy**; it falls → you must **sell**. You trade **with** the move: buy high, sell low.
+In the example, if you were *short* those options, a 1% rally forces you to buy **$4mm** of stock, and a 1% drop forces you to sell $4mm.
+
+**3. Why it matters beyond your own P&L.**
+Recall the P&L of a hedged position: `≈ ½·Γ·(ΔS)²` (long gamma gains on any move, short gamma loses). For the example, a $2 move gives `½ × 0.04 × 1,000,000 × 2² = $80,000` of gamma P&L (a gain if long, a loss if short). When the **dealers** who make markets in options are collectively on one side, their re-hedging becomes a market-wide flow:
+- Dealers **net long gamma** → their hedging **dampens** moves (lower realized vol, mean reversion).
+- Dealers **net short gamma** → their hedging **amplifies** moves (higher realized vol, trending, gap risk).
+Lessons 2–3 build this into the market-level GEX picture and the "gamma flip".
+
+**4. Where gamma lives: strike and expiry.**
+Gamma is largest **at the money** and **near expiry**. ATM, `Γ ≈ φ(d₁)/(S·σ·√T) ≈ 0.4/(S·σ·√T)`:
+- S = 100, σ = 20%, 1 year: `Γ ≈ 0.4/20 = 0.020`.
+- Same option with 1 week left: `Γ ≈ 0.4/(100 × 0.2 × √(1/52)) ≈ 0.144`, about **7× larger** (`√52 ≈ 7.2`).
+So short-dated ATM open interest carries most of the GEX, which is why expiry weeks and 0DTE options get so much attention. Also note GEX scales with **S²**, so compare dollar gamma, not raw Γ, across underlyings.
+
+**5. Calls and puts have the same gamma.**
+At the same strike and expiry, a call and a put have identical Γ (put-call parity: their difference is linear in S). So GEX depends on **who is long or short** the options, not on whether they're calls or puts.
+
+**Key intuition:** gamma exposure is "how many dollars of stock get traded per 1% move to stay hedged". Long gamma trades against the move and calms markets; short gamma chases it and inflates moves. It concentrates in short-dated, at-the-money strikes.
+
+### GEX Quiz
+
+**GQ1.** Write the formula for dollar gamma (GEX) per 1% move for an options position.
+**GQ2.** You're short 5,000 contracts (multiplier 100) of an option with Γ = 0.02 on a $100 stock. What is your GEX, and what must you do if the stock rallies 1%?
+**GQ3.** Explain in one sentence each why dealers who are net long gamma dampen moves and dealers who are net short gamma amplify them.
+**GQ4.** An ATM option has Γ = 0.02 with 1 year left. Roughly what is its gamma with 1 month left (same vol and spot)? Why?
 
 ---
 ---
@@ -135,7 +183,7 @@ Straddle ≈ `0.8·S·σ·√T = 0.8·100·0.25·0.5 = 10.0` (exact 9.97). The s
 **A10. Θ = −$9/year ≈ −$0.025/day.**
 With r = 0 the BS PDE gives `Θ + ½σ²S²Γ = 0` → `Θ = −½·0.09·10,000·0.02 = −9` per year; `/365 ≈ −0.0247` per day. Long gamma means paying theta, and the PDE says exactly how much.
 
-## Part 3 — Lesson Quiz
+## Part 2 — Merton Quiz
 
 **LA1.** A **European call on the firm's assets V**, struck at the **face value of the debt F**, expiring at the debt maturity T. Payoff `max(V_T − F, 0)`.
 
@@ -148,6 +196,18 @@ With r = 0 the BS PDE gives `Θ + ½σ²S²Γ = 0` → `Θ = −½·0.09·10,000
 **LA5. D ≈ $75.41; put ≈ $0.69; spread ≈ 91bp.**
 `D = V − E = 100 − 24.59 = 75.41`. Riskless debt = `80e^(−0.05) = 76.10`, so the put = `76.10 − 75.41 ≈ 0.69`. Yield = `−ln(75.41/80) ≈ 5.91%` → spread ≈ `5.91% − 5.00% ≈ 91bp`.
 
+## Part 3 — GEX Quiz
+
+**GA1.** `GEX = Γ × S² × 0.01 × (number of contracts × multiplier)`: the dollars of stock traded to re-hedge per 1% move.
+
+**GA2. −$1,000,000 per 1%; buy about $1mm of stock.**
+`0.02 × 100² × 0.01 × (5,000 × 100) = 0.02 × 100 × 500,000 = $1,000,000`, negative because you're short. After a 1% rally your delta is 10,000 shares shorter (`0.02 × $1 × 500,000`), so you **buy ~10,000 shares ≈ $1mm**. You're buying into strength.
+
+**GA3.** Long gamma: as price rises their delta grows, so they sell into rallies and buy dips, which leans against the move. Short gamma: as price rises they get shorter, so they must buy into rallies and sell into declines, which pushes in the direction of the move.
+
+**GA4. ≈ 0.069, about 3.5× larger.**
+ATM gamma scales with `1/√T`: `0.02 × √12 ≈ 0.02 × 3.46 ≈ 0.069`. As expiry approaches, delta for near-ATM options swings between 0 and 1 over a narrower price range.
+
 ---
 
-*Tomorrow (Day 20): Merton Lesson 2, backing out firm value and asset vol from the observed stock price and equity vol (the two-equation system, and why equity vol = (V/E)·N(d₁)·σ_V makes levered stocks so volatile). Day 21 is the next big cumulative quiz.*
+*Tomorrow (Day 20): Merton Lesson 2, backing out firm value and asset vol from the observed stock price and equity vol (the two-equation system, and why equity vol = (V/E)·N(d₁)·σ_V makes levered stocks so volatile). Gamma Exposure Lesson 2: dealer positioning and market-level GEX from open interest. Day 21 is the next big cumulative quiz.*
