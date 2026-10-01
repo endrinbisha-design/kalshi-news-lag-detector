@@ -195,9 +195,11 @@ the magnitude as not. The convolution currently in `models/post_peak.py` is fitt
 August window and will over-correct by November. It should be re-measured monthly rather
 than inherited.
 
-Gap values are quantised: observations are reported in 0.1 °C, so gaps land on multiples of
-0.18 °F, and the common values (+0.90 = 0.5 °C, +1.98 = 1.1 °C) are lattice points, not
-coincidences.
+Gap values are quantised because the KNYC ASOS reports temperature in **whole degrees
+Fahrenheit** — all 1591 readings 08-01..09-29 sit within 0.1 °F of an integer, and the
+METAR tenths-of-°C value is just a conversion. The common gaps (+0.90 ≈ +1 °F, +1.98 ≈
++2 °F) are whole-degree steps. (Corrected 2026-09-30; this paragraph previously attributed
+the lattice to 0.1 °C reporting.)
 
 ## 5. Honest limits
 

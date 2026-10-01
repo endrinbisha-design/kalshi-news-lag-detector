@@ -13,48 +13,48 @@ quantisation section — are deliberately frozen at what was known when the call
 and should not be refreshed. Everything else tracks the latest run.
 
 This document exists because on 09-11 I claimed the preliminary CLI had beaten the
-six-hour group and that "the ordering is reversed." **Tested across all 60 days, that is
+six-hour group and that "the ordering is reversed." **Tested across all 61 days, that is
 wrong.** The groups are settlement-grade and the preliminary is not.
 
 ## The scoreboard
 
 | source | available | matches settlement |
 |---|---|---|
-| morning group (8 AM–2 PM) | 1:51 PM | 25/60 — **42 %** |
-| preliminary CLI | ~4:31–5:14 PM ‡ | 28/37 — **76 %** |
-| afternoon group (2 PM–8 PM) | 7:51 PM | 51/60 — **85 %** † |
-| **max of ALL same-day groups** | **7:51 PM** | **59/60 — 98 %** |
+| morning group (8 AM–2 PM) | 1:51 PM | 25/61 — **41 %** |
+| preliminary CLI | ~4:31–5:14 PM ‡ | 28/38 — **74 %** |
+| afternoon group (2 PM–8 PM) | 7:51 PM | 52/61 — **85 %** † |
+| **max of ALL same-day groups** | **7:51 PM** | **60/61 — 98 %** |
 
 ‡ **Not always.** On 2026-09-28 the preliminary was issued at **9:41 PM**, absent from
 both api.weather.gov and IEM AFOS through 5:47 PM — a real absence, not a feed miss. It
 still carried "VALID TODAY AS OF 0400 PM" and still counts as a preliminary. Anything that
-assumes the preliminary is in hand by ~5:15 PM now has one counterexample in 37; 09-29's was back at 4:43 PM.
+assumes the preliminary is in hand by ~5:15 PM now has one counterexample in 38; 09-29's was back at 4:43 PM.
 
 † **That 85 % is partly a free ride — see "The afternoon group is not always an
 independent measurement" below.** On the 17 days where it repeats the morning group it
-scores 17/17; on the other 43 it scores 34/43 = 79 %. **The partition behind those two
-numbers is itself known to be wrong in at least one case, so treat 79 % as indicative
+scores 17/17; on the other 44 it scores 35/44 = 80 %. **The partition behind those two
+numbers is itself known to be wrong in at least one case, so treat 80 % as indicative
 rather than measured.**
 
 **That last row says "all same-day groups" for a reason, and the wording is a correction.**
 It originally read "max of both groups" and was computed from the morning and afternoon
 groups only. 2026-09-14 broke it: an overnight-max day settling at 75, where morning
 (73.04) and afternoon (73.94) both round to 74, while the **2 AM–8 AM group reads 75.02**
-and was never consulted. Across the 60 days, daytime-only would miss **two** — 08-27 and
+and was never consulted. Across the 61 days, daytime-only would miss **two** — 08-27 and
 09-14 — where all-same-day-groups misses one. The 98 % was under-specified, not wrong; two
 of three available groups were going in, and no earlier day in the run stressed it.
 
 Read the timing column before the accuracy column; these are not competing at the same
 hour.
 
-* **At 4:40 PM the preliminary is the best thing available** — 76 % against the morning
-  group's 42 %. That much of the 09-11 observation survives.
+* **At 4:40 PM the preliminary is the best thing available** — 74 % against the morning
+  group's 41 %. That much of the 09-11 observation survives.
 * **Waiting until 7:51 PM beats it decisively.** Max of all same-day groups is 98 %. The claim that
   the preliminary supersedes the group was generalised from a single favourable day and
   does not hold.
 * The one failure of max-of-all-same-day-groups is **2026-08-27**, the sensor-contamination day
   where a 9-minute spike during heavy rain entered the group and the CLI's QC rejected it
-  (group 81, settled 77). That remains the only day in 60 where a group was wrong and the
+  (group 81, settled 77). That remains the only day in 61 where a group was wrong and the
   CLI right — so it is one exception, not a pattern, but it is the reason the 98 % is not
   100 %.
 
@@ -67,13 +67,13 @@ Day twenty-eight was a +2.
 
 | settled − preliminary | days | share |
 |---|---|---|
-| **+0 °F** | 28 | **76 %** |
-| **+1 °F** | 8 | **22 %** |
+| **+0 °F** | 28 | **74 %** |
+| **+1 °F** | 9 | **24 %** |
 | **+2 °F** | **1** | **3 %** |
 | negative | **0** | **0 %** |
 
 The nine misses are 08-03, 08-17, 08-25, 08-30, 09-01, 09-03, 09-06, 09-13 (all +1) and
-**09-20 (+2)**. The never-negative direction still holds at 37/37 — **but see the minimum
+**09-20 (+2)**. The never-negative direction still holds at 38/38 — **but see the minimum
 section below, which shows what that record does and does not protect against.**
 
 **The +2 is a different mechanism, not a bigger version of the +1.** On 09-20 the
@@ -85,7 +85,7 @@ preliminary measuring a different part of the day altogether. **Rain-clearing ev
 warm advection are their own mode, and autumn produces more of them, not fewer.**
 
 The split has read 63/37, 65/35, 62/38, 64/36, 65/35, 67/33, 68/32, 69/31, 70/30, 68/29/4
-then **69/28/3** across eleven successive days, and has since drifted to **76/22/3** (37 preliminaries, through 09-29). Quote it from the script, never from memory — and
+then **69/28/3** across eleven successive days, and has since drifted to **74/24/3** (38 preliminaries, through 09-30). Quote it from the script, never from memory — and
 note that the thing which had "held across all nine" was exactly the thing that broke.
 
 **Read this as a lesson about the shape of the claim, not just the numbers.** A
@@ -99,10 +99,10 @@ So the preliminary gives a **one-sided distribution over the preliminary and the
 integers above it**, known at ~4:40 PM:
 
 ```
-P(settle = preliminary)     ≈ 0.76
-P(settle = preliminary + 1) ≈ 0.22
-P(settle = preliminary + 2) ≈ 0.03     <- 1 day in 37, added 09-20
-P(settle < preliminary)     ≈ 0        (0/37, but see the caveat below)
+P(settle = preliminary)     ≈ 0.74
+P(settle = preliminary + 1) ≈ 0.24
+P(settle = preliminary + 2) ≈ 0.03     <- 1 day in 38, added 09-20
+P(settle < preliminary)     ≈ 0        (0/38, but see the caveat below)
 ```
 
 The never-below half rests on a mechanism — the preliminary can only be *beaten* by what
@@ -144,13 +144,13 @@ Against real ladders:
 
 | | days | result |
 |---|---|---|
-| both integers in one bucket | 26/37 (70 %) | bucket correct **26/26** |
+| both integers in one bucket | 26/38 (68 %) | bucket correct **26/26** |
 | …of which the open-ended bucket | **8** | certainty is nearly free |
 | …**genuine 2-wide bucket** | **18** | **18/18 correct** |
-| integers straddle a boundary | 11/37 (30 %) | majority side won **10/11** |
+| integers straddle a boundary | 12/38 (32 %) | majority side won **10/12** |
 
-So the split flags a genuine narrow-bucket on **18 days in 37 — not 4 — and was right on
-all eighteen.** The straddle days went 10/11 to the majority side, not 2/4.
+So the split flags a genuine narrow-bucket on **18 days in 38 — not 4 — and was right on
+all eighteen.** The straddle days went 10/12 to the majority side, not 2/4.
 
 **But "near-certainty" was the wrong word, and 09-20's +2 shows why it was structurally
 wrong rather than just optimistic.** A 2-wide bucket `[lo, lo+1]` can only contain both
@@ -216,7 +216,7 @@ It is not a one-off. Across the 49 days:
 
 | | days |
 |---|---|
-| afternoon group **exactly equals** the morning group | **17/60** — upper bound |
+| afternoon group **exactly equals** the morning group | **17/61** — upper bound |
 | …and also exceeds every snapshot inside its own window | **12** |
 
 Twelve exact ties, each landing precisely on the morning maximum, looked far more
@@ -433,6 +433,26 @@ carrying the findings.
 
 ## Quantisation beats modelling near a rounding boundary
 
+> **Corrected 2026-09-30 — the "lattice" is whole degrees Fahrenheit, and the wall below
+> was never a finding.** All **1591** KNYC hourly snapshots and six-hour groups from 08-01
+> to 09-29 lie within 0.1 °F of a whole degree. The ASOS reports temperature in whole °F;
+> the METAR's tenths-of-°C `T` group is that integer converted, which is why every value
+> looks like 71.96 or 73.04. So:
+>
+> * "Nothing between 0.00 and 0.90 °F" / "nothing between +0.0 and +0.5 °C" is the step
+>   from +0 °F to +1 °F. +0.5/+0.6 °C is +1 °F, +1.1/+1.2 is +2 °F, +1.6/+1.7 is +3 °F.
+>   It is a property of the instrument and **cannot** be falsified by any afternoon.
+> * From 09-15 to 09-29 this document and the daily calls named "a group landing in the
+>   gap" as a falsifier and counted each non-occurrence as a survival. **Those eight
+>   survivals carry no evidential weight** and should not be cited.
+> * The rounding-boundary arithmetic ("0.44 °F below 71.5") was ceremony: the reported
+>   value already is the integer that settles, barring CLI QC.
+>
+> What is **not** affected: every excess distribution below (they are just integer-°F
+> steps), the equal/below/above conditioning, and max-of-groups. Those were always counts
+> of whole-degree outcomes. The section is left as written, because the reasoning that
+> got here is part of the record, but read every "lattice" as "whole °F".
+
 The single most useful result of the run, from 2026-09-15. Three consecutive `:51`
 snapshots read 71.06 °F and the day looked finished; the banked value sat **0.44 °F** below
 the 71.5 rounding boundary. The gap cannot take an arbitrary value — observations are
@@ -559,6 +579,22 @@ was "too small to use". It was too small to use as a number; it was not too smal
 the August mass was the wrong reference class. When a pool's positive mass sits entirely
 in one month, split it by month *before* shading, and let a same-season zero pull toward
 the market rather than splitting the difference.
+
+**09-30: lost again, from the other side, on the largest divergence of the run.** Equal
+shape, three hourly reads of 72 from 1:51 to 3:51 PM on a clear, dry, calm afternoon. The
+equal subset (consistent across August and September, so no reference-class problem this
+time) put 72-73 at ~87 % and 74-75 at ~13 %; the 16:00 candle, which had the third 72, sat
+at 65/67 ¢ and 32/33 ¢. **Settled 74.** The continuous trace reached 73 at 2:45 PM and 74
+at 3:31 PM while the 2:51 and 3:51 obs both read 72, and the 4:51 ob read 73 — the
+"plateau" was the hourly feed sampling the dips of a trace still rising after a morning
+that climbed 2 °F an hour. I also declined to shade the +2 tail up on the grounds that
+wet days carry the fatter tail; this was a dry day.
+
+**The same-information record is now two wins, three losses** — 09-16 W, 09-24 L, 09-25 W,
+09-29 L, 09-30 L — with the last two lost from opposite sides. The conditional pools have
+been good at point estimates on quiet days. They have **not** shown that they beat the
+market when the market disagrees. Until that record turns, a divergence is a reason to
+doubt the pool, not an edge.
 
 ## A second zero-mass claim fell, for the same reason as the first — 2026-09-27
 
