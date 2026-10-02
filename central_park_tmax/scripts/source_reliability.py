@@ -60,9 +60,11 @@ def load_metar(d1: dt.date, d2: dt.date, offset: int = -4):
          f"&year2={d2.year}&month2={d2.month}&day2={d2.day}")
     # IEM returns 503 intermittently -- three times in this run -- and the old single-shot
     # call simply raised, killing whatever analysis was in progress. Retry with backoff.
+    # On 2026-10-01 a 503 outlasted 2+4+8+16 s and a manual retry 30 s later succeeded, so
+    # the budget now runs to ~2 minutes.
     txt = None
     last = None
-    for delay in (0, 2, 4, 8, 16):
+    for delay in (0, 2, 4, 8, 16, 30, 60):
         if delay:
             time.sleep(delay)
         try:
@@ -72,7 +74,7 @@ def load_metar(d1: dt.date, d2: dt.date, offset: int = -4):
         except Exception as exc:               # noqa: BLE001 - any transport failure retries
             last = exc
     if txt is None:
-        raise RuntimeError(f"IEM unreachable after 5 attempts: {last}")
+        raise RuntimeError(f"IEM unreachable after 7 attempts: {last}")
     # And check the body is actually CSV. On 2026-09-21 aviationweather handed back a 502
     # HTML page and an ad-hoc parser turned it into ZERO rows without complaint -- the same
     # silent-failure family as every other bug here. An empty frame must be an error, not
