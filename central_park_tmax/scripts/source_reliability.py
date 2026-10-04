@@ -27,6 +27,7 @@ import json
 import re
 import sys
 import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -203,16 +204,39 @@ def ask_1700(day: dt.date, lo: int, hi: int):
     for suffix in (f"-B{lo + 0.5}", f"-B{hi - 0.5}"):
         u = (f"{_KALSHI}/series/KXHIGHNY/markets/{tick}{suffix}"
              f"/candlesticks?start_ts={end - 3600}&end_ts={end}&period_interval=60")
-        try:
-            with urllib.request.urlopen(urllib.request.Request(u, headers=UA), timeout=60) as r:
-                cs = json.load(r).get("candlesticks", [])
-        except Exception:
+        # 2026-10-03: a bare ``except Exception: continue`` here turned HTTP 429s into "no
+        # 17:00 candle" for 09-16 and 09-17, whose candles exist and priced fine a day
+        # earlier. A 404 means the ticker suffix is wrong and the other one should be
+        # tried; anything else is retried, and if it persists it raises rather than
+        # quietly shrinking the sample.
+        cs = None
+        last = None
+        for delay in (0, 2, 4, 8, 16):
+            if delay:
+                time.sleep(delay)
+            try:
+                with urllib.request.urlopen(urllib.request.Request(u, headers=UA),
+                                            timeout=60) as r:
+                    cs = json.load(r).get("candlesticks", [])
+                break
+            except urllib.error.HTTPError as exc:
+                if exc.code == 404:
+                    break
+                last = exc
+            except Exception as exc:           # noqa: BLE001 - transport failure retries
+                last = exc
+        if cs is None:
+            if last is not None:
+                raise RuntimeError(f"Kalshi candles unreachable for {tick}{suffix}: {last}")
             continue
         for c in cs:
             if c.get("end_period_ts") == end:
-                a = _candle_cents(c.get("yes_ask")) or _candle_cents(c.get("price"))
-                if a:
+                a = _candle_cents(c.get("yes_ask"))
+                if a is None:
+                    a = _candle_cents(c.get("price"))
+                if a is not None:
                     return a
+        time.sleep(0.3)                        # stay under the candle endpoint's rate limit
     return None
 
 
