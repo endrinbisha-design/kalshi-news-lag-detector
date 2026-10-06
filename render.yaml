@@ -1,0 +1,17 @@
+# One-click deploy on Render: Dashboard -> New -> Blueprint -> pick this repo + branch claude/tender-hamilton-f5vocz.
+# Render provides HTTPS/WSS. Keep exactly ONE instance (rooms live in memory).
+services:
+  - type: web
+    name: courtyard-duel
+    runtime: docker
+    dockerfilePath: ./courtyard-duel/Dockerfile
+    dockerContext: ./courtyard-duel
+    branch: claude/tender-hamilton-f5vocz
+    plan: free              # free plan sleeps when idle (~30-60 s wake-up); use "starter" for always-on
+    numInstances: 1
+    healthCheckPath: /healthz
+    envVars:
+      - key: TRUST_PROXY
+        value: "1"
+      - key: HSTS
+        value: "1"
