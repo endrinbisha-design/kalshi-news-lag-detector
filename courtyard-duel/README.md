@@ -57,8 +57,8 @@ The game server must be reachable by both of you over HTTPS. Pick one:
 `https://your-host/#r=<22-character-random-token>`. It is private (128-bit token, no public room list), limited to two
 players, and the token sits after the `#`, so it is never sent to the server in an HTTP request or logged.
 Your friend opens it → types a name → **Join the duel**. While you wait you can practise on the range
-(press <kbd>Esc</kbd> any time to copy the link again). If your friend's tab refreshes or drops, the same link puts them
-back in the same seat and the round restarts — they cannot appear twice.
+(press <kbd>Esc</kbd> any time to copy the link again). If your friend's tab refreshes or drops, the same link (or just
+reopening the page: the room is remembered per tab) puts them back in the same seat and the round restarts — they cannot appear twice.
 
 ## Controls (all rebindable in Settings)
 

@@ -179,6 +179,7 @@ export class Game {
   }
 
   leaveRoom(): void {
+    try { history.replaceState(null, '', location.pathname + location.search); sessionStorage.removeItem('courtyard-duel.room'); } catch { /* ignore */ }
     this.net?.leave();
     this.net = null;
     this.room = null;
@@ -239,6 +240,7 @@ export class Game {
       case 'joined':
         if (from === 'net') {
           this.mySlot = m.slot; this.roomToken = m.room;
+          try { history.replaceState(null, '', location.pathname + location.search + '#r=' + m.room); sessionStorage.setItem('courtyard-duel.room', m.room); } catch { /* ignore */ }
           this.setClock(m.time);
           this.net?.sendLoadout(this.loadout.primary, this.loadout.pistol);
           this.updateInvite();
@@ -300,9 +302,10 @@ export class Game {
   }
 
   private updateInvite(): void {
-    if (!this.net) { this.hud.setInvite(null); return; }
-    const waiting = !this.room || this.room.phase === 'waiting' || !this.room.players[1 - this.room.slot]?.connected;
-    this.hud.setInvite(waiting && this.roomToken
+    // only while practising solo inside an open room (not during a match / pause)
+    const practising = this.source === 'practice';
+    const opp = this.room?.players[1 - (this.room?.slot ?? 0)];
+    this.hud.setInvite(this.net && this.roomToken && practising && !opp?.connected
       ? `<b>Room ready.</b> Practising solo while you wait. Press <kbd>Esc</kbd> to copy the invite link and send it to your friend.`
       : null);
   }

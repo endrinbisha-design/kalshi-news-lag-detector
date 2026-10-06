@@ -19,9 +19,9 @@ export function buildMapMeshes(mats: Loaded, anisotropy: number): BuiltMap {
   const batches = new Map<string, GeoBatch>();
   const batch = (k: string) => { let b = batches.get(k); if (!b) { b = new GeoBatch(); batches.set(k, b); } return b; };
   const extra: Record<string, THREE.Material> = {
-    panel: new THREE.MeshStandardMaterial({ color: 0xd2bd98, roughness: 0.92, metalness: 0 }),
+    panel: mats.kiosk,
     dark: new THREE.MeshStandardMaterial({ color: 0x4a3f33, roughness: 0.85, metalness: 0.05 }),
-    timber: new THREE.MeshStandardMaterial({ color: 0x8a6a46, roughness: 0.8, metalness: 0 }),
+    timber: (() => { const t = mats.crate.clone(); t.color.setHex(0xb08a5c); return t; })(),
     iron: new THREE.MeshStandardMaterial({ color: 0x2b2d30, roughness: 0.55, metalness: 0.85 }),
     roofMauve: new THREE.MeshStandardMaterial({ color: 0x9d7f93, roughness: 0.75, metalness: 0 }),
     roofBlue: new THREE.MeshStandardMaterial({ color: 0x7f96b8, roughness: 0.75, metalness: 0 }),
@@ -29,7 +29,7 @@ export function buildMapMeshes(mats: Loaded, anisotropy: number): BuiltMap {
     rimPaint: mats.rim.clone(),
   };
   const matFor = (k: string): THREE.Material => mats[k] ?? extra[k];
-  const tileOf = (k: string) => (mats[k]?.userData.tile as number | undefined) ?? 2;
+  const tileOf = (k: string) => (mats[k]?.userData.tile as number | undefined) ?? (k === 'panel' ? 3 : k === 'timber' ? 1.2 : 2);
 
   const rnd = mulberry(99);
   const addBox = (key: string, m: THREE.Matrix4, sx: number, sy: number, sz: number, worldTop = false, jitter = false) => {

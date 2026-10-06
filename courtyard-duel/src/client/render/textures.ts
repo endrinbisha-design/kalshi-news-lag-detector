@@ -10,7 +10,7 @@ export const PBR: Record<string, PBRDef> = {
   alcove: { name: 'sandstone_blocks_08', tile: 3.2 },
   pit: { name: 'sand_01', tile: 4.5, normalScale: 1.2, tint: 0xfff0cf },
   rim: { name: 'sandstone_cracks', tile: 3.0, tint: 0xf0a868 },
-  kiosk: { name: 'sandstone_cracks', tile: 3.0, tint: 0xe6d6c4 },
+  kiosk: { name: 'sandstone_blocks_08', tile: 3.2, tint: 0xd9cdbd },
   step: { name: 'sandstone_blocks_04', tile: 1.6, tint: 0xb9b3a8 },
   crate: { name: 'worn_planks', tile: 1.4, tint: 0xffffff },
 };

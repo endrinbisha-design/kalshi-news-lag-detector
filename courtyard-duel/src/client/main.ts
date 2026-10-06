@@ -18,10 +18,14 @@ let settingsReturn: Screen = 'menu';
 let resultInfo: { winner: number; slot: number; scores: [number, number]; names: [string, string] } | null = null;
 let lastStatus: { s: NetStatus; d?: string } = { s: 'closed' };
 let inviteToken = parseHash();
+let lobbyRole: 'host' | 'guest' = 'host';
 
 function parseHash(): string {
   const m = /[#&]r=([A-Za-z0-9_-]{22})/.exec(location.hash);
-  return m ? m[1] : '';
+  if (m) return m[1];
+  // a refreshed tab without the hash: offer to rejoin the room this browser was in
+  try { const t = sessionStorage.getItem('courtyard-duel.room'); if (t && /^[A-Za-z0-9_-]{22}$/.test(t)) return t; } catch { /* ignore */ }
+  return '';
 }
 
 const host: GameHost = {
@@ -49,6 +53,7 @@ const host: GameHost = {
 let room: RoomInfo | null = null;
 const game = new Game(canvas, hudRoot, host);
 (window as any).__game = game;
+(window as any).__audio = audio;
 
 // ------------------------------------------------------------------ helpers
 const h = (html: string): HTMLElement => { const d = document.createElement('div'); d.innerHTML = html.trim(); return d.firstElementChild as HTMLElement; };
@@ -118,6 +123,7 @@ function renderMenu(c: HTMLElement): void {
   const remember = () => { settings.name = nameValue(); saveSettings(); };
   c.querySelector('#b-create')!.addEventListener('click', () => {
     remember(); audio.init();
+    lobbyRole = 'host';
     game.startOnline({ create: true, name: settings.name, lagMs: Number(q.get('lag') ?? 0) });
     setScreen('lobby');
   });
@@ -136,17 +142,19 @@ function renderMenu(c: HTMLElement): void {
 
 function joinNow(): void {
   audio.init();
+  lobbyRole = 'guest';
   game.startOnline({ room: inviteToken, name: settings.name, lagMs: Number(q.get('lag') ?? 0) });
   setScreen('lobby');
 }
 
 function renderJoin(c: HTMLElement): void {
-  c.innerHTML = `<h1>You're invited</h1><p class="sub">A friend sent you a private duel room. Pick a name and jump in. First to ${10} round wins.</p>
+  const rejoin = !!(() => { try { return sessionStorage.getItem('courtyard-duel.room') === inviteToken; } catch { return false; } })();
+  c.innerHTML = `<h1>${rejoin ? 'Welcome back' : "You're invited"}</h1><p class="sub">${rejoin ? 'Your private duel room is still open. Rejoin to carry on where you left off (your seat is kept for you).' : 'A friend sent you a private duel room. Pick a name and jump in. First to 10 round wins.'}</p>
     <div class="field"><label for="name-input">Display name</label><input id="name-input" type="text" maxlength="16" placeholder="Your name" autocomplete="off" value="${esc(settings.name)}"></div>
-    <div class="btnrow"><button class="primary" id="b-join">Join the duel</button><button id="b-menu">Main menu</button></div>
+    <div class="btnrow"><button class="primary" id="b-join">${rejoin ? 'Rejoin the duel' : 'Join the duel'}</button><button id="b-menu">Main menu</button></div>
     <div class="err" id="join-err"></div>${controlsNote()}`;
   c.querySelector('#b-join')!.addEventListener('click', () => { settings.name = nameValue(); saveSettings(); joinNow(); });
-  c.querySelector('#b-menu')!.addEventListener('click', () => { history.replaceState(null, '', location.pathname + location.search); inviteToken = ''; setScreen('menu'); });
+  c.querySelector('#b-menu')!.addEventListener('click', () => { history.replaceState(null, '', location.pathname + location.search); try { sessionStorage.removeItem('courtyard-duel.room'); } catch { /* ignore */ } inviteToken = ''; setScreen('menu'); });
 }
 
 function renderLobby(c: HTMLElement): void {
@@ -154,14 +162,18 @@ function renderLobby(c: HTMLElement): void {
   const link = game.roomLink;
   const opp = room?.players[1 - (room?.slot ?? 0)];
   const oppHere = !!opp?.connected;
+  const host_ = lobbyRole === 'host' || room?.slot === 0;
   const creating = !link && st.s !== 'closed';
-  c.innerHTML = `<h2>${oppHere ? 'Opponent connected' : creating ? 'Setting up your room…' : 'Private room ready'}</h2>
-    ${oppHere ? `<p class="sub"><b>${esc(opp!.name)}</b> is here. The match starts as soon as you click below.</p><div class="btnrow"><button class="primary" id="b-go">Start match</button></div>`
-      : `<p class="sub">Send this link to your friend. It is private: only people with the exact link can join, and only one other player fits.</p>
+  const title = oppHere ? 'Opponent connected' : host_ ? (creating ? 'Setting up your room…' : 'Private room ready') : (st.s === 'open' ? 'Joined the room' : 'Joining…');
+  c.innerHTML = `<h2>${title}</h2>
+    ${oppHere ? `<p class="sub"><b>${esc(opp!.name)}</b> is here. Click below to start the match.</p><div class="btnrow"><button class="primary" id="b-go">Start match</button></div>`
+      : host_ ? `<p class="sub">Send this link to your friend. It is private: only people with the exact link can join, and only one other player fits.</p>
       <div class="linkbox"><input id="link" type="text" readonly value="${esc(link)}" placeholder="Creating room…"><button id="b-copy" class="primary" ${link ? '' : 'disabled'}>Copy link</button></div>
       <div class="note" id="lobby-status">${statusText()}</div>
       <div class="btnrow"><button id="b-practice">Practice while waiting</button><button class="warn" id="b-leave">Cancel room</button></div>
-      <p class="note">While you practise, the scoreboard stays idle. When your friend opens the link the match begins automatically after you click the screen again.</p>`}
+      <p class="note">While you practise nothing is scored. When your friend opens the link the match is announced here; click the screen once to start it.</p>`
+      : `<p class="sub">Waiting for the host to be online…</p><div class="note" id="lobby-status">${statusText()}</div>
+      <div class="btnrow"><button id="b-practice">Practice while waiting</button><button class="warn" id="b-leave">Leave</button></div>`}
     <div class="err" id="lobby-err"></div>`;
   c.querySelector('#b-copy')?.addEventListener('click', async (e) => {
     const ok = await copyText(game.roomLink); (e.target as HTMLElement).textContent = ok ? 'Copied ✓' : 'Select & copy manually';
@@ -236,7 +248,8 @@ function refreshLive(): void {
   if (screen === 'lobby') {
     const link = document.getElementById('link') as HTMLInputElement | null;
     const opp = room?.players[1 - (room?.slot ?? 0)];
-    const needRebuild = (!link && !!game.roomLink) || (!!opp?.connected !== (uiRoot.querySelector('#b-go') !== null)) || (link && link.value !== game.roomLink);
+    const isHost = lobbyRole === 'host' || room?.slot === 0;
+    const needRebuild = (isHost && !link && !!game.roomLink) || (!!opp?.connected !== (uiRoot.querySelector('#b-go') !== null)) || (isHost && link && link.value !== game.roomLink);
     if (needRebuild) setScreen('lobby');
     else { const s = document.getElementById('lobby-status'); if (s) s.innerHTML = statusText(); }
   } else if (screen === 'result') {

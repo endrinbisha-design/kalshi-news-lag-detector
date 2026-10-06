@@ -20,13 +20,32 @@ describe('map & spawns', () => {
     }
   });
 
-  it('layout is left/right and top/bottom symmetric in solid volume', () => {
-    // every obstacle above step height has a mirror partner (within tolerance), except the car/crate pair which is point-symmetric
-    const solid = world.boxes.filter((b) => b.y1 - b.y0 > 0.6 && b.style !== 'courtyard');
+  it('the whole arena is point-symmetric (180° rotation) so both spawn sides are equivalent', () => {
+    const solid = world.boxes.filter((b) => b.style !== 'courtyard' && b.style !== 'alcove' && b.style !== 'pit');
+    const angleDiff = (a: number, b: number) => { const d = Math.abs(((a - b) % Math.PI + Math.PI) % Math.PI); return Math.min(d, Math.PI - d); };
     for (const b of solid) {
-      const partner = solid.find((o) => Math.abs(o.cx + b.cx) < 0.9 && Math.abs(o.hx * o.hz - b.hx * b.hz) < 0.8 && Math.abs(o.cz - b.cz) < 0.9 || (Math.abs(o.cx + b.cx) < 0.9 && Math.abs(o.cz + b.cz) < 0.9));
-      expect(partner, `box ${b.id} ${b.style} lacks a mirror`).toBeTruthy();
+      const partner = solid.find((o) =>
+        Math.abs(o.cx + b.cx) < 0.02 && Math.abs(o.cz + b.cz) < 0.02 &&
+        o.style === b.style && Math.abs(o.y0 - b.y0) < 1e-6 && Math.abs(o.y1 - b.y1) < 1e-6 &&
+        ((Math.abs(o.hx - b.hx) < 1e-6 && Math.abs(o.hz - b.hz) < 1e-6 && angleDiff(o.rot, b.rot) < 1e-6) ||
+         (Math.abs(o.hx - b.hz) < 1e-6 && Math.abs(o.hz - b.hx) < 1e-6 && angleDiff(o.rot + Math.PI / 2, b.rot) < 1e-6)));
+      expect(partner, `box ${b.id} (${b.style}) at (${b.cx.toFixed(2)},${b.cz.toFixed(2)}) has no 180° partner`).toBeTruthy();
     }
+  });
+
+  it('fair sightlines: what spawn A can see, spawn B sees from the point-reflected position', () => {
+    const [a, b] = MAP.spawns;
+    let mismatches = 0, total = 0;
+    for (let x = -17; x <= 17; x += 1) for (let z = -8.5; z <= 8.5; z += 1) {
+      const lvl = world.groundHeight(x, z, 0.05, 5).h;
+      if (!(lvl > -1)) continue;
+      const eye = lvl + 1.62;
+      const seenA = world.lineOfSight(a.x, 1.62, a.z, x, eye, z);
+      const seenB = world.lineOfSight(b.x, 1.62, b.z, -x, eye, -z);
+      total++; if (seenA !== seenB) mismatches++;
+    }
+    expect(total).toBeGreaterThan(200);
+    expect(mismatches / total).toBeLessThan(0.01);
   });
 });
 

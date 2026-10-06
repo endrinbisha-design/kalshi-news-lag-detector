@@ -65,15 +65,15 @@ export class Stage {
     const sky = new Sky();
     sky.scale.setScalar(800);
     const u = sky.material.uniforms;
-    u.turbidity.value = 5.5; u.rayleigh.value = 1.35; u.mieCoefficient.value = 0.004; u.mieDirectionalG.value = 0.82;
+    u.turbidity.value = 8; u.rayleigh.value = 1.15; u.mieCoefficient.value = 0.004; u.mieDirectionalG.value = 0.82;
     u.sunPosition.value.copy(SUN_DIR);
     sky.name = 'sky';
     this.scene.add(sky);
     const pm = new THREE.PMREMGenerator(this.renderer);
     const envScene = new THREE.Scene();
     const envSky = new Sky(); envSky.scale.setScalar(400);
-    Object.assign(envSky.material.uniforms.turbidity, { value: 5.5 });
-    envSky.material.uniforms.rayleigh.value = 1.35; envSky.material.uniforms.mieCoefficient.value = 0.004;
+    Object.assign(envSky.material.uniforms.turbidity, { value: 8 });
+    envSky.material.uniforms.rayleigh.value = 1.15; envSky.material.uniforms.mieCoefficient.value = 0.004;
     envSky.material.uniforms.mieDirectionalG.value = 0.82; envSky.material.uniforms.sunPosition.value.copy(SUN_DIR);
     envScene.add(envSky);
     // warm sand-coloured bounce light from the ground: a large dim plane below the horizon

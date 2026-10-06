@@ -159,10 +159,11 @@ export function buildMap(): MapDef {
   // Courtyard crate clusters (x-mirrored).
   for (const mx of [false, true]) {
     const f = (x: number) => (mx ? IMG_W - x : x);
+    // symmetric about the centre line (z = 0) so both spawn sides see identical cover
     addObb(f(499), 413, 1.25, 1.25, 0, 0, H.crate, 'wood', 'crate', 1);
-    addObb(f(484), 478, 1.5, 2.3, 0, 0, H.crate, 'wood', 'crate', 2);
-    addObb(f(486), 478, 1.05, 1.05, 0, H.crate, H.crate + 1.0, 'wood', 'crate', 3);
-    addObb(f(500), 545, 1.25, 1.1, 0, 0, H.crate, 'wood', 'crate', 1);
+    addObb(f(484), 476, 1.5, 2.3, 0, 0, H.crate, 'wood', 'crate', 2);
+    addObb(f(486), 476, 1.05, 1.05, 0, H.crate, H.crate + 1.0, 'wood', 'crate', 3);
+    addObb(f(499), 539, 1.25, 1.25, 0, 0, H.crate, 'wood', 'crate', 1);
   }
   // Corner stacks pressed against the chamfered walls (stepped crate pairs).
   {
@@ -187,8 +188,8 @@ export function buildMap(): MapDef {
   // Pit crates (point symmetric) and the car.
   addObb(1012, 362, 1.4, 1.4, 0, H.pit, H.pit + 1.35, 'wood', 'crate', 3);
   addObb(IMG_W - 1012, IMG_H - 362, 1.4, 1.4, 0, H.pit, H.pit + 1.35, 'wood', 'crate', 3);
-  addObb(933, 483, 4.2, 1.75, -47.5, H.pit + 0.12, H.pit + 0.95, 'metal', 'car');
-  addObb(925, 489, 2.0, 1.55, -47.5, H.pit + 0.95, H.pit + 1.5, 'metal', 'carCabin');
+  addObb(CX, CZ, 4.2, 1.75, -47.5, H.pit + 0.12, H.pit + 0.95, 'metal', 'car');
+  addObb(CX, CZ, 2.2, 1.55, -47.5, H.pit + 0.95, H.pit + 1.5, 'metal', 'carCabin');
   // Spawn cover (x- and y-mirrored): knee-to-chest crates beside each spawn.
   quadObb(350, 383, 1.1, 1.1, 8, 0, 1.15, 'wood', 'crate', 1);
 

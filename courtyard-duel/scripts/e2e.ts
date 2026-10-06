@@ -31,9 +31,11 @@ const browser = await chromium.launch({
   args: ['--no-sandbox', '--use-angle=swiftshader', '--use-gl=angle', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--autoplay-policy=no-user-gesture-required'],
 });
 
+const allPages: { name: string; page: Page }[] = [];
 const lowSettings = JSON.stringify({ preset: 'low', renderScale: 0.4, resolution: '960x540', volume: 0.1, name: '' });
 async function newPlayer(ctx: BrowserContext, url: string, name: string): Promise<Page> {
   const page = await ctx.newPage();
+  allPages.push({ name, page });
   page.on('pageerror', (e) => console.log(`[${name} pageerror]`, e.message.slice(0, 300)));
   await page.addInitScript((s) => { try { if (!localStorage.getItem('courtyard-duel.settings.v1')) localStorage.setItem('courtyard-duel.settings.v1', s); } catch { /* ignore */ } }, lowSettings);
   await page.goto(url);
@@ -217,6 +219,7 @@ try {
   check('rematch resets the score and starts a new match', rm.scores.join(',') === '0,0');
 } catch (e) {
   check('e2e run completed without exceptions', false, (e as Error).stack?.split('\n').slice(0, 3).join(' | '));
+  for (const { name, page } of allPages) { try { await page.screenshot({ path: `${OUT}/failure-${name}.png`, timeout: 5000 }); console.log(name, 'text:', (await page.evaluate(() => document.body.innerText)).slice(0, 300).replace(/\n/g, ' | ')); } catch { /* page closed */ } }
 } finally {
   await browser.close();
   server.kill('SIGTERM');
