@@ -52,6 +52,14 @@ The game server must be reachable by both of you over HTTPS. Pick one:
    ```
    Open that URL (not `localhost`) yourself, create the room, send the generated link to your friend. Your PC must stay on.
    No port forwarding needed; the connection is outbound-only.
+3. **claude.ai artifact (no server at all)** — `ARTIFACT=1 npx vite build && node scripts/build-artifact.mjs` writes
+   `dist/artifact/page.html` + `files.json`, published as an artifact with the `room` capability. There is no game
+   server: the **host's browser tab runs the authoritative match** (the same `MatchSim`) and the guest's inputs and the
+   host's snapshots travel through the artifact room's presence channel (`src/client/relay.ts`). Share the artifact
+   with your friend, one player clicks **Host a duel**, the other clicks **Join** next to the host's name. The host tab
+   must stay in front (background tabs are throttled), the host has zero latency while the guest gets two relay hops,
+   and lag compensation still applies. Tested with a local mock of the room channel (`scripts/e2e-relay.ts`, 10/10);
+   real-platform latency is unmeasured.
 
 **Inviting your friend:** in the lobby press **Copy link** and send it by any chat app. The link looks like
 `https://your-host/#r=<22-character-random-token>`. It is private (128-bit token, no public room list), limited to two
