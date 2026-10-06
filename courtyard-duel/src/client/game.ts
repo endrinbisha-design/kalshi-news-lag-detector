@@ -8,6 +8,7 @@ import { GameEvent, OpponentSnap, PHASES, Phase, RoomInfo, ServerMsg, Snapshot, 
 import { audio } from './audio';
 import { Input } from './input';
 import { INTERP_DELAY_MS, NetStatus, OnlineSession, PracticeSession, Session } from './net';
+import { RelayGuestSession, RelayHostSession } from './relay';
 import { Stage, SUN_DIR } from './render/stage';
 import { loadMaterials } from './render/textures';
 import { buildMapMeshes } from './render/mapBuilder';
@@ -48,7 +49,8 @@ export class Game {
 
   // ---- sessions
   private practice: PracticeSession | null = null;
-  private net: OnlineSession | null = null;
+  private net: Session | null = null;
+  relayCode = '';
   private source: 'none' | 'practice' | 'net' = 'none';
   private mySlot = 0;
   room: RoomInfo | null = null;
@@ -178,7 +180,21 @@ export class Game {
     this.startPractice(this.myName);
   }
 
+  /** Artifact relay mode: host runs the authoritative sim in this tab; guest connects through the claude.ai room relay. */
+  startRelay(sess: RelayHostSession | RelayGuestSession, name: string): void {
+    this.myName = name || 'Player';
+    this.net?.close();
+    this.roomToken = '';
+    this.relayCode = sess.code;
+    this.net = sess;
+    sess.onMessage = (m) => this.onMessage(m, 'net');
+    sess.onStatus = (s, d) => { this.netStatus = s; this.netDetail = d ?? ''; this.host.onStatus(s, d); };
+    this.startPractice(this.myName);
+    void sess.start();
+  }
+
   leaveRoom(): void {
+    this.relayCode = '';
     try { history.replaceState(null, '', location.pathname + location.search); sessionStorage.removeItem('courtyard-duel.room'); } catch { /* ignore */ }
     this.net?.leave();
     this.net = null;
@@ -239,8 +255,8 @@ export class Game {
     switch (m.t) {
       case 'joined':
         if (from === 'net') {
-          this.mySlot = m.slot; this.roomToken = m.room;
-          try { history.replaceState(null, '', location.pathname + location.search + '#r=' + m.room); sessionStorage.setItem('courtyard-duel.room', m.room); } catch { /* ignore */ }
+          this.mySlot = m.slot; this.roomToken = this.relayCode ? '' : m.room;
+          if (!this.relayCode) { try { history.replaceState(null, '', location.pathname + location.search + '#r=' + m.room); sessionStorage.setItem('courtyard-duel.room', m.room); } catch { /* ignore */ } }
           this.setClock(m.time);
           this.net?.sendLoadout(this.loadout.primary, this.loadout.pistol);
           this.updateInvite();
@@ -305,8 +321,9 @@ export class Game {
     // only while practising solo inside an open room (not during a match / pause)
     const practising = this.source === 'practice';
     const opp = this.room?.players[1 - (this.room?.slot ?? 0)];
-    this.hud.setInvite(this.net && this.roomToken && practising && !opp?.connected
-      ? `<b>Room ready.</b> Practising solo while you wait. Press <kbd>Esc</kbd> to copy the invite link and send it to your friend.`
+    this.hud.setInvite(this.net && (this.roomToken || this.relayCode) && practising && !opp?.connected
+      ? (this.relayCode ? `<b>Duel open (code ${this.relayCode}).</b> Practising solo while you wait. Your friend opens this same page and clicks <b>Join</b> next to your name.`
+        : `<b>Room ready.</b> Practising solo while you wait. Press <kbd>Esc</kbd> to copy the invite link and send it to your friend.`)
       : null);
   }
 
@@ -663,6 +680,7 @@ export class Game {
 
     // session pump + fixed tick
     this.activeSession()?.frame(dt);
+    if (this.net && this.source !== 'net') this.net.frame(dt);
     if (!this.paused || this.testOverride) {
       this.acc += dt;
       let n = 0;

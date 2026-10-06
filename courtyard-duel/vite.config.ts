@@ -1,11 +1,15 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'node:path';
 
+// ARTIFACT=1 builds a relative-path bundle for publishing as a claude.ai artifact (see scripts/build-artifact.mjs)
+const artifact = !!process.env.ARTIFACT;
+
 export default defineConfig({
   root: 'src/client',
+  base: artifact ? './' : '/',
   publicDir: '../../public',
   build: {
-    outDir: '../../dist/client',
+    outDir: artifact ? '../../dist/artifact' : '../../dist/client',
     emptyOutDir: true,
     target: 'es2022',
     chunkSizeWarningLimit: 1500,

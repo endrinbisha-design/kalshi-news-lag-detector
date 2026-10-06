@@ -13,8 +13,13 @@ export class Input {
   onPressed: (code: string) => void = () => {};
   rebinding: ((code: string) => void) | null = null;
 
+  /** Fallback when the page may not capture the mouse (e.g. inside a sandboxed iframe): relative mouse movement still works. */
+  softLock = false;
+
   constructor(private canvas: HTMLCanvasElement) {
+    document.addEventListener('pointerlockerror', () => this.enterSoftLock());
     document.addEventListener('pointerlockchange', () => {
+      if (this.softLock) return;
       this.locked = document.pointerLockElement === this.canvas;
       if (!this.locked) { this.down.clear(); }
       this.onLockChange(this.locked);
@@ -37,12 +42,24 @@ export class Input {
 
   lock(): void {
     const c: any = this.canvas;
+    if (!c.requestPointerLock) { this.enterSoftLock(); return; }
+    const fallback = () => { try { const q = c.requestPointerLock(); if (q && typeof q.catch === 'function') q.catch(() => this.enterSoftLock()); } catch { this.enterSoftLock(); } };
     try {
-      const p = c.requestPointerLock?.({ unadjustedMovement: true });
-      if (p && typeof p.catch === 'function') p.catch(() => { try { c.requestPointerLock(); } catch { /* ignore */ } });
-    } catch { try { c.requestPointerLock(); } catch { /* ignore */ } }
+      const p = c.requestPointerLock({ unadjustedMovement: true });
+      if (p && typeof p.catch === 'function') p.catch(fallback);
+    } catch { fallback(); }
   }
-  unlock(): void { if (document.pointerLockElement) document.exitPointerLock(); }
+  private enterSoftLock(): void {
+    if (this.locked) return;
+    this.softLock = true;
+    this.locked = true;
+    this.canvas.style.cursor = 'crosshair';
+    this.onLockChange(true);
+  }
+  unlock(): void {
+    if (this.softLock) { this.softLock = false; this.locked = false; this.canvas.style.cursor = ''; this.down.clear(); this.onLockChange(false); return; }
+    if (document.pointerLockElement) document.exitPointerLock();
+  }
 
   private key(e: KeyboardEvent, isDown: boolean): void {
     if (this.rebinding && isDown) { e.preventDefault(); e.stopPropagation(); const cb = this.rebinding; this.rebinding = null; cb(e.code); return; }
@@ -52,6 +69,7 @@ export class Input {
       // swallow keys the game uses (Tab, Space, function keys we bind) so the browser does not react
       if (e.code === 'Tab' || e.code === 'Space' || e.code.startsWith('Arrow') || Object.values(settings.bindings).includes(e.code)) e.preventDefault();
     }
+    if (isDown && e.code === 'Escape' && this.softLock) { this.unlock(); return; }
     if (isDown) { if (!e.repeat) { this.pressed.add(e.code); this.onPressed(e.code); } this.down.add(e.code); }
     else this.down.delete(e.code);
   }

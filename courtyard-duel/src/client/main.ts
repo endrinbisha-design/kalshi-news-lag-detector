@@ -5,6 +5,11 @@ import { NetStatus } from './net';
 import { saveSettings, settings } from './settings';
 import { buildSettings } from './ui/settingsUi';
 import { RoomInfo } from '../shared/protocol';
+import { RelayGuestSession, RelayHostSession, artifactRoom, isArtifactHost, watchHosts } from './relay';
+
+/** Set when running inside a claude.ai artifact: multiplayer goes through the artifact's realtime room relay. */
+let relayLobby: any = null;
+let stopHostWatch: (() => void) | null = null;
 
 type Screen = 'loading' | 'menu' | 'join' | 'lobby' | 'pause' | 'settings' | 'result' | 'error' | 'none';
 
@@ -91,7 +96,7 @@ function setScreen(s: Screen): void {
   uiRoot.appendChild(wrap);
   switch (s) {
     case 'loading': wrap.classList.add('solid'); renderLoading(card); break;
-    case 'menu': wrap.classList.add('solid'); renderMenu(card); break;
+    case 'menu': wrap.classList.add('solid'); if (relayLobby) renderRelayMenu(card); else renderMenu(card); break;
     case 'join': wrap.classList.add('solid'); renderJoin(card); break;
     case 'lobby': renderLobby(card); break;
     case 'pause': renderPause(card); break;
@@ -107,6 +112,43 @@ function renderLoading(c: HTMLElement): void {
 
 function controlsNote(): string {
   return `<div class="note"><b>Controls</b> · <kbd>W A S D</kbd> move · mouse aim · <kbd>Space</kbd> jump · <kbd>C</kbd> crouch · <kbd>Shift</kbd> walk (silent) · <kbd>R</kbd> reload · <kbd>1</kbd>/<kbd>2</kbd> weapons · <kbd>Tab</kbd> scoreboard · right-click scope (AWP) · <kbd>Esc</kbd> menu. Rebind in Settings.</div>`;
+}
+
+function renderRelayMenu(c: HTMLElement): void {
+  c.innerHTML = `<h1>Courtyard <span>Duel</span></h1>
+    <p class="sub">Private 1v1 tactical shooter. Host a duel, then your friend opens this same page and joins it. First to 10 rounds wins.</p>
+    <div class="field"><label for="name-input">Display name</label><input id="name-input" type="text" maxlength="16" placeholder="Your name" autocomplete="off" value="${esc(settings.name)}"></div>
+    <div class="btnrow"><button class="primary" id="b-host">Host a duel</button><button id="b-practice">Practice range (solo)</button></div>
+    <div class="field" style="margin-top:20px"><label>Open duels on this page</label><div id="host-list" class="note">Looking for open duels…</div></div>
+    <div class="err" id="menu-err"></div>
+    <div class="btnrow"><button id="b-settings">Settings</button></div>
+    <div class="note">Playing through claude.ai: the host's browser runs the match and your friend connects through claude.ai's realtime relay. Your friend needs this page shared with them (Share button at the top) and a claude.ai sign-in.</div>
+    ${controlsNote()}`;
+  const remember = () => { settings.name = nameValue(); saveSettings(); };
+  c.querySelector('#b-host')!.addEventListener('click', () => {
+    remember(); audio.init(); lobbyRole = 'host';
+    game.startRelay(new RelayHostSession(relayLobby, settings.name), settings.name);
+    setScreen('lobby');
+  });
+  c.querySelector('#b-practice')!.addEventListener('click', () => { remember(); if (game.inRoom) game.leaveRoom(); game.startPractice(settings.name); setScreen('none'); startLock(); });
+  c.querySelector('#b-settings')!.addEventListener('click', () => { settingsReturn = 'menu'; setScreen('settings'); });
+  const list = c.querySelector('#host-list') as HTMLElement;
+  stopHostWatch?.();
+  stopHostWatch = watchHosts(relayLobby, (hosts) => {
+    if (!document.body.contains(list)) { stopHostWatch?.(); stopHostWatch = null; return; }
+    list.innerHTML = hosts.length ? '' : 'No open duels yet. Ask your friend to click <b>Host a duel</b>, or host one yourself.';
+    for (const h of hosts) {
+      const row = document.createElement('div'); row.className = 'kb';
+      const label = document.createElement('span'); label.textContent = `${h.name}'s duel (${h.code})`;
+      const b = document.createElement('button'); b.className = 'primary'; b.textContent = 'Join';
+      b.onclick = () => {
+        remember(); audio.init(); lobbyRole = 'guest';
+        game.startRelay(new RelayGuestSession(relayLobby, settings.name, h.code), settings.name);
+        setScreen('lobby');
+      };
+      row.append(label, b); list.appendChild(row);
+    }
+  });
 }
 
 function renderMenu(c: HTMLElement): void {
@@ -165,6 +207,20 @@ function renderLobby(c: HTMLElement): void {
   const host_ = lobbyRole === 'host' || room?.slot === 0;
   const creating = !link && st.s !== 'closed';
   const title = oppHere ? 'Opponent connected' : host_ ? (creating ? 'Setting up your room…' : 'Private room ready') : (st.s === 'open' ? 'Joined the room' : 'Joining…');
+  if (game.relayCode) {
+    c.innerHTML = `<h2>${oppHere ? 'Opponent connected' : host_ ? 'Your duel is open' : (st.s === 'open' ? 'Joined' : 'Joining…')}</h2>
+      ${oppHere ? `<p class="sub"><b>${esc(opp!.name)}</b> is here. Click below to start the match.</p><div class="btnrow"><button class="primary" id="b-go">Start match</button></div>`
+        : host_ ? `<p class="sub">Duel code <b>${esc(game.relayCode)}</b>. Share this page with your friend (Share button at the top of the artifact). They open it, enter a name and click <b>Join</b> next to your name. Keep this tab in front while you play: your browser runs the match.</p>`
+        : `<p class="sub">Connecting to the host through claude.ai…</p>`}
+      <div class="note" id="lobby-status">${statusText()}</div>
+      ${oppHere ? '' : `<div class="btnrow"><button id="b-practice">Practice while waiting</button><button class="warn" id="b-leave">${host_ ? 'Close duel' : 'Leave'}</button></div>`}
+      <div class="err" id="lobby-err"></div>`;
+    const go = () => { setScreen('none'); startLock(); };
+    c.querySelector('#b-go')?.addEventListener('click', go);
+    c.querySelector('#b-practice')?.addEventListener('click', go);
+    c.querySelector('#b-leave')?.addEventListener('click', () => { game.leaveRoom(); setScreen('menu'); });
+    return;
+  }
   c.innerHTML = `<h2>${title}</h2>
     ${oppHere ? `<p class="sub"><b>${esc(opp!.name)}</b> is here. Click below to start the match.</p><div class="btnrow"><button class="primary" id="b-go">Start match</button></div>`
       : host_ ? `<p class="sub">Send this link to your friend. It is private: only people with the exact link can join, and only one other player fits.</p>
@@ -191,6 +247,7 @@ function statusText(): string {
   if (st.s === 'connecting') return 'Connecting to the server…';
   if (st.s === 'reconnecting') return 'Connection lost — retrying…';
   if (st.s === 'closed') return esc(st.d ?? 'Disconnected.');
+  if (game.relayCode) return lobbyRole === 'host' ? 'Relay connected. Waiting for your friend to join…' : 'Connected to the host.';
   return 'Connected. Waiting for your friend to open the link…';
 }
 
@@ -276,6 +333,7 @@ async function boot(): Promise<void> {
     return;
   }
   game.startPractice(settings.name || 'You'); // idle backdrop behind menus
+  if (isArtifactHost()) { relayLobby = await artifactRoom(); inviteToken = ''; }
   window.addEventListener('hashchange', () => { inviteToken = parseHash(); });
   if (q.get('autostart') === 'practice') { setScreen('none'); (window as any).__skipLock = true; return; }
   setScreen(inviteToken ? 'join' : 'menu');
