@@ -1,0 +1,16 @@
+# Render.com blueprint: one Docker web service. Render terminates TLS (https:// + wss://) and supports WebSockets.
+# IMPORTANT: keep exactly ONE instance. Rooms live in this process's memory.
+services:
+  - type: web
+    name: courtyard-duel
+    runtime: docker
+    plan: starter            # the free plan also works but sleeps after ~15 min idle (first request wakes it in ~30-60 s)
+    numInstances: 1
+    healthCheckPath: /healthz
+    envVars:
+      - key: TRUST_PROXY
+        value: "1"
+      - key: HSTS
+        value: "1"
+      - key: ROUND_TIME_SEC
+        value: "90"

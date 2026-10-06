@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { WEAPONS, WeaponId } from '../../shared/config';
 import { PlayerState } from '../../shared/player';
-import { HandRig, curlHand, makeHand, makeSegment, placeSegment } from './models/limbs';
+import { HandRig, curlHand, freezeHand, makeHand, makeSegment, placeSegment } from './models/limbs';
 import { WeaponModel, createWeapon } from './models/weapons';
 import { mats } from './models/kit';
 import { makeFlashTexture } from './textures';
@@ -27,10 +27,10 @@ export class ViewModel {
   private model: WeaponModel | null = null;
   private rHand: HandRig;
   private lHand: HandRig;
-  private rArm = makeSegment(0.03, 0.042, mats().sleeveOlive);
-  private lArm = makeSegment(0.03, 0.042, mats().sleeveOlive);
-  private rEnd = new THREE.Vector3(0.22, -0.46, 0.35);
-  private lEnd = new THREE.Vector3(-0.26, -0.46, 0.3);
+  private rArm = makeSegment(0.02, 0.03, mats().sleeveOlive);
+  private lArm = makeSegment(0.02, 0.03, mats().sleeveOlive);
+  private rEnd = new THREE.Vector3(0.26, -0.55, 0.3);
+  private lEnd = new THREE.Vector3(-0.18, -0.62, 0.22);
   private flash: THREE.Sprite;
   private flashT = 0;
   private flashLen = 0.06;
@@ -54,6 +54,7 @@ export class ViewModel {
   private lastSlot = -1;
   private deployFrom = 0;
   visible = true;
+  private frozen = false;
   private sleeve = mats().sleeveOlive;
   /** Cached world-space helper positions for effects. */
   readonly muzzleView = new THREE.Vector3();
@@ -63,6 +64,7 @@ export class ViewModel {
     this.root.add(this.holder);
     this.rHand = makeHand('right');
     this.lHand = makeHand('left');
+    // fingers are posed once per weapon kind, then baked into one mesh each (saves ~30 draw calls)
     const fm = new THREE.SpriteMaterial({ map: makeFlashTexture(), color: 0xffffff, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, depthTest: false });
     this.flash = new THREE.Sprite(fm);
     this.flash.visible = false;
@@ -110,6 +112,7 @@ export class ViewModel {
     placeHand(this.rHand, m.gripR, R_GRIP, 'right');
     if (m.kind === 'pistol') placeHand(this.lHand, m.gripR.clone().add(new THREE.Vector3(-0.045, -0.012, 0.0)), L_PISTOL, 'left');
     else placeHand(this.lHand, m.gripL, L_UNDER, 'left');
+    if (!this.frozen) { freezeHand(this.rHand); freezeHand(this.lHand); this.frozen = true; }
   }
 
   /** Called when the local player fires (immediate response: kick + flash). */
@@ -154,59 +157,52 @@ export class ViewModel {
     const deployT = p.switchT > 0 ? 1 - p.switchT / def.drawTime : 1;
     const dep = 1 - ease(deployT);
 
-    // ---- reload
+    // ---- reload (all procedural; progress rt in 0..1 from the predicted reload timer)
     const rt = p.reloadT > 0 ? 1 - p.reloadT / def.reloadTime : -1;
     const reloading = rt >= 0;
-    let tiltZ = 0, tiltX = 0, lowerY = 0;
-    const lPos = (m.kind === 'pistol' ? m.gripR.clone().add(new THREE.Vector3(-0.045, -0.012, 0)) : m.gripL.clone());
-    let leftOff = new THREE.Vector3();
-    let magOff = new THREE.Vector3();
-    let magRot = 0;
-    let boltBack = 0;
-    let leftFree = false; // left hand leaves the weapon
+    let tiltZ = 0, tiltX = 0, lowerY = 0, magRot = 0, boltBack = 0, slideBack = 0;
+    const leftOff = new THREE.Vector3();
+    const magOff = new THREE.Vector3();
     if (reloading) {
-      const wellDelta = m.magwell.clone().sub(lPos); // from rest to magwell
-      const dropped = new THREE.Vector3(-0.1, -0.2, 0.0);
+      const rest = m.kind === 'pistol' ? m.gripR.clone().add(new THREE.Vector3(-0.045, -0.012, 0)) : m.gripL.clone();
+      const well = m.magwell.clone().sub(rest).add(new THREE.Vector3(m.kind === 'pistol' ? -0.01 : -0.02, -0.03, 0.0));
+      const pull = well.clone().add(new THREE.Vector3(-0.02, -0.17, 0.04));
+      const far = well.clone().add(new THREE.Vector3(-0.12, -0.34, 0.1));
+      const mix = (a: THREE.Vector3, b: THREE.Vector3, t: number) => new THREE.Vector3().lerpVectors(a, b, t);
+      const zero = new THREE.Vector3();
       if (m.kind === 'sniper') {
-        // bolt up/back (0-.2), mag swap (.2-.75), bolt forward/down (.75-.95)
-        const a = sstep(0, 0.2, rt) - sstep(0.75, 0.95, rt);
-        boltBack = a; tiltZ = 0.15 * a; 
-        const c = sstep(0.2, 0.35, rt) - sstep(0.55, 0.75, rt);
-        leftFree = c > 0.001;
-        leftOff = wellDelta.clone().multiplyScalar(c);
-        magOff = new THREE.Vector3(0, -0.16 * sstep(0.3, 0.45, rt) * (1 - sstep(0.5, 0.65, rt)), 0);
+        const open = sstep(0, 0.14, rt) * (1 - sstep(0.78, 0.92, rt));
+        boltBack = open; tiltZ = 0.12 * open;
+        if (rt < 0.22) leftOff.copy(mix(zero, well, sstep(0.08, 0.22, rt)));
+        else if (rt < 0.34) leftOff.copy(mix(well, pull, sstep(0.22, 0.34, rt)));
+        else if (rt < 0.46) leftOff.copy(mix(pull, far, sstep(0.34, 0.46, rt)));
+        else if (rt < 0.58) leftOff.copy(mix(far, pull, sstep(0.46, 0.58, rt)));
+        else if (rt < 0.7) leftOff.copy(mix(pull, well, sstep(0.58, 0.7, rt)));
+        else leftOff.copy(mix(well, zero, sstep(0.7, 0.8, rt)));
+        if (rt >= 0.22 && rt < 0.34) magOff.copy(leftOff).sub(well).add(new THREE.Vector3(0, 0, 0));
+        else if (rt >= 0.34 && rt < 0.5) { magOff.set(-0.03, -0.45 * sstep(0.34, 0.5, rt), 0.05); magRot = 1.0 * sstep(0.34, 0.5, rt); }
+        else if (rt >= 0.5 && rt < 0.7) magOff.copy(leftOff).sub(well).add(new THREE.Vector3(0, 0, 0));
       } else {
-        // 0-.15 tilt + hand to magwell; .15-.3 pull mag; .3-.45 hand away (mag dropped); .45-.6 new mag; .6-.75 insert; .75-.9 rack; .9-1 settle
-        const tilt = sstep(0, 0.15, rt) * (1 - sstep(0.88, 1, rt));
-        tiltZ = 0.28 * tilt; tiltX = -0.1 * tilt; lowerY = -0.02 * tilt;
-        const toWell = sstep(0, 0.15, rt);
-        const away = sstep(0.28, 0.42, rt) * (1 - sstep(0.45, 0.58, rt));
-        const back = sstep(0.58, 0.72, rt);
-        let h = toWell;
-        h = h * (1 - away) + 0 * away;
-        const pull = sstep(0.15, 0.28, rt);
-        const away2 = sstep(0.3, 0.45, rt);
-        // left hand: rest -> well (holding mag) -> pulls down -> out of view -> back with new mag -> inserts -> returns to rest
-        const handWell = wellDelta.clone();
-        const handDown = wellDelta.clone().add(new THREE.Vector3(-0.03, -0.17, 0.05));
-        const handFar = wellDelta.clone().add(new THREE.Vector3(-0.1, -0.3, 0.12));
-        if (rt < 0.15) leftOff.copy(handWell).multiplyScalar(toWell);
-        else if (rt < 0.3) leftOff.lerpVectors(handWell, handDown, pull);
-        else if (rt < 0.45) leftOff.lerpVectors(handDown, handFar, away2);
-        else if (rt < 0.6) leftOff.lerpVectors(handFar, handDown, sstep(0.45, 0.6, rt));
-        else if (rt < 0.75) leftOff.lerpVectors(handDown, handWell, back);
-        else leftOff.lerpVectors(handWell, new THREE.Vector3(), sstep(0.75, 0.88, rt));
-        leftFree = true;
-        void h; void away; void dropped;
-        // magazine: attached to the hand when pulled / carried
-        if (rt >= 0.15 && rt < 0.32) magOff.copy(leftOff).sub(handWell).add(new THREE.Vector3(0, 0, 0));
-        else if (rt >= 0.32 && rt < 0.45) { magOff.set(-0.05, -0.55 * sstep(0.32, 0.45, rt), 0.1); magRot = 1.2; }
-        else if (rt >= 0.45 && rt < 0.75) magOff.copy(leftOff).sub(handWell).add(new THREE.Vector3(0, 0, 0));
-        if (rt >= 0.32 && rt < 0.5) { /* old mag falls */ }
-        boltBack = sstep(0.78, 0.84, rt) * (1 - sstep(0.86, 0.92, rt));
-        if (m.kind === 'pistol') boltBack = 0;
+        const tilt = sstep(0, 0.12, rt) * (1 - sstep(0.9, 1, rt));
+        tiltZ = 0.3 * tilt; tiltX = -0.1 * tilt; lowerY = -0.02 * tilt;
+        const pistol = m.kind === 'pistol';
+        const tOut = pistol ? 0.34 : 0.3, tFar = pistol ? 0.48 : 0.45, tBack = pistol ? 0.6 : 0.58, tIn = pistol ? 0.72 : 0.7;
+        if (rt < 0.12) leftOff.copy(mix(zero, well, sstep(0, 0.12, rt)));
+        else if (rt < 0.2) leftOff.copy(well);
+        else if (rt < tOut) leftOff.copy(mix(well, pull, sstep(0.2, tOut, rt)));
+        else if (rt < tFar) leftOff.copy(mix(pull, far, sstep(tOut, tFar, rt)));
+        else if (rt < tBack) leftOff.copy(mix(far, pull, sstep(tFar, tBack, rt)));
+        else if (rt < tIn) leftOff.copy(mix(pull, well, sstep(tBack, tIn, rt)));
+        else leftOff.copy(mix(well, zero, sstep(tIn, 0.84, rt)));
+        // magazine rides with the hand, drops when released, re-appears with the new one
+        if (rt >= 0.2 && rt < tOut) magOff.copy(leftOff).sub(well);
+        else if (rt >= tOut && rt < tFar) { const k = sstep(tOut, tFar, rt); magOff.set(-0.04 * k, -0.55 * k, 0.12 * k); magRot = 1.3 * k; }
+        else if (rt >= tBack && rt < tIn) magOff.copy(leftOff).sub(well).add(new THREE.Vector3(0, -0.0, 0));
+        if (pistol) slideBack = sstep(0.74, 0.8, rt) * (1 - sstep(0.82, 0.88, rt));
+        else boltBack = sstep(0.76, 0.82, rt) * (1 - sstep(0.84, 0.9, rt));
       }
     }
+    const magHidden = reloading && m.kind !== 'sniper' ? (rt > 0.4 && rt < 0.52) : reloading && rt > 0.44 && rt < 0.5;
 
     // ---- apply holder transform
     const base = m.fp;
@@ -225,6 +221,7 @@ export class ViewModel {
     if (this.slide) {
       this.slide.position.z += (this.slideRest.z - this.slide.position.z) * Math.min(1, dt * 22);
       if (p.ammo[p.weapon] === 0 && !reloading) this.slide.position.z = this.slideRest.z + 0.045; // locked back when empty
+      if (slideBack > 0) this.slide.position.z = this.slideRest.z + 0.045 * slideBack;
     }
     if (this.bolt) {
       if (this.id === 'awp') {
@@ -242,7 +239,7 @@ export class ViewModel {
     if (this.mag) {
       this.mag.position.copy(this.magRest).add(magOff);
       this.mag.rotation.z = magRot;
-      this.mag.visible = !(reloading && rt > 0.32 && rt < 0.45 && magOff.y < -0.45);
+      this.mag.visible = !magHidden;
     }
 
     // ---- hands + forearms
@@ -251,7 +248,6 @@ export class ViewModel {
     const poseL = m.kind === 'pistol' ? L_PISTOL : L_UNDER;
     const off = new THREE.Vector3(0, 0, 0.055).applyEuler(poseL.rot);
     lh.position.copy(basePose).add(off).add(leftOff);
-    void leftFree; void lPos;
     // forearms: wrist -> elbow anchored in view space
     this.updateArm(this.rArm, this.rHand.root.position, this.rEnd);
     this.updateArm(this.lArm, lh.position, this.lEnd);

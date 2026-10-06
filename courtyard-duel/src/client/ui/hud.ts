@@ -145,17 +145,22 @@ export class Hud {
   }
 
   banner(big: string, small = '', color = '#fff'): void {
+    this.bannerKey = '';
     this.bannerEl.className = '';
     void this.bannerEl.offsetWidth;
     this.bannerEl.innerHTML = `<div class="big" style="color:${color}">${esc(big)}</div><div class="small">${esc(small)}</div>`;
     this.bannerEl.classList.add('fade');
     window.clearTimeout(this.bannerTimer);
   }
+  private bannerKey = '';
   persistentBanner(big: string, small = '', color = '#fff'): void {
+    const key = big + '|' + small + '|' + color;
+    if (key === this.bannerKey) return;
+    this.bannerKey = key;
     this.bannerEl.className = '';
     this.bannerEl.innerHTML = `<div class="big" style="color:${color}">${esc(big)}</div><div class="small">${esc(small)}</div>`;
   }
-  clearBanner(): void { this.bannerEl.className = ''; this.bannerEl.innerHTML = ''; }
+  clearBanner(): void { this.bannerKey = ''; this.bannerEl.className = ''; this.bannerEl.innerHTML = ''; }
 
   scope(on: boolean, radiusVh = 42): void {
     this.scopeEl.classList.toggle('hidden', !on);

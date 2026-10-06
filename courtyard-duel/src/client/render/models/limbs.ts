@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { mats, mesh } from './kit';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 
 const UP = new THREE.Vector3(0, 1, 0);
 
@@ -116,6 +117,7 @@ export function makeHand(side: 'left' | 'right', mat: THREE.Material = mats().gl
 
 /** Curl fingers: c in radians per joint (0 = straight, ~1.4 = fully bent). Finger curls toward the palm (+Y local = back of hand, so negative X rotation bends toward -Y). */
 export function curlHand(h: HandRig, c: number[], thumbCurl: number, thumbSwing: number, side: 'left' | 'right'): void {
+  if (!h.fingers.length) return; // already frozen into a single mesh
   const s = side === 'right' ? 1 : -1;
   for (let f = 0; f < 4; f++) {
     const base = c[f] ?? c[0];
@@ -126,3 +128,31 @@ export function curlHand(h: HandRig, c: number[], thumbCurl: number, thumbSwing:
   h.thumb[0].rotation.set(0.1, (0.5 + thumbSwing) * s, 0.0);
   h.thumb[1].rotation.x = -thumbCurl;
 }
+
+/** Bake a posed hand into a single mesh (its finger joints no longer animate). */
+export function freezeHand(h: HandRig): void {
+  const root = h.root;
+  const mats = new Map<THREE.Material, THREE.BufferGeometry[]>();
+  root.updateMatrixWorld(true);
+  const inv = new THREE.Matrix4().copy(root.matrixWorld).invert();
+  root.traverse((o) => {
+    const m = o as THREE.Mesh;
+    if (!m.isMesh) return;
+    let g = m.geometry.clone();
+    if (g.index) g = g.toNonIndexed();
+    for (const k of Object.keys(g.attributes)) if (k !== 'position' && k !== 'normal' && k !== 'uv') g.deleteAttribute(k);
+    g.applyMatrix4(new THREE.Matrix4().multiplyMatrices(inv, m.matrixWorld));
+    const mat = m.material as THREE.Material;
+    if (!mats.has(mat)) mats.set(mat, []);
+    mats.get(mat)!.push(g);
+  });
+  for (const c of [...root.children]) root.remove(c);
+  for (const [mat, geos] of mats) {
+    const g = mergeGeometries(geos, false);
+    if (!g) continue;
+    const mesh = mesh_(g, mat);
+    root.add(mesh);
+  }
+  h.fingers = []; h.thumb = [];
+}
+const mesh_ = (g: THREE.BufferGeometry, m: THREE.Material) => { const x = new THREE.Mesh(g, m); x.castShadow = true; x.receiveShadow = true; return x; };

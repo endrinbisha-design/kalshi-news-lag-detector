@@ -1,0 +1,19 @@
+# /etc/systemd/system/courtyard-duel.service
+[Unit]
+Description=Courtyard Duel game server
+After=network.target
+
+[Service]
+WorkingDirectory=/opt/courtyard-duel
+ExecStart=/usr/bin/node dist/server/index.js
+Environment=NODE_ENV=production PORT=8080 HOST=127.0.0.1 TRUST_PROXY=1 HSTS=1
+Restart=always
+RestartSec=2
+User=duel
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

@@ -8,7 +8,7 @@ import { GameEvent, OpponentSnap, PHASES, Phase, RoomInfo, ServerMsg, Snapshot, 
 import { audio } from './audio';
 import { Input } from './input';
 import { INTERP_DELAY_MS, NetStatus, OnlineSession, PracticeSession, Session } from './net';
-import { Stage } from './render/stage';
+import { Stage, SUN_DIR } from './render/stage';
 import { loadMaterials } from './render/textures';
 import { buildMapMeshes } from './render/mapBuilder';
 import { Effects } from './render/effects';
@@ -105,6 +105,8 @@ export class Game {
   // ---- perf
   fps = 0;
   frameMs: number[] = [];
+  logicMs: number[] = []; renderMs: number[] = [];
+  private frameT0 = 0;
   private lastFrame = 0;
   private fpsAcc = 0; private fpsFrames = 0;
   private running = false;
@@ -462,7 +464,7 @@ export class Game {
         if (e.victim === me) this.hud.deathMessage(`Eliminated by ${kname}`);
         return;
       }
-      case 'live': this.hud.banner('Fight!', '', '#7dff9a'); audio.ui('go', 0.8); this.hud.showLoadout(false, this.loadout); return;
+      case 'live': this.phase = 'live'; this.prepBannerShown = false; this.hud.banner('Fight!', '', '#7dff9a'); audio.ui('go', 0.8); this.hud.showLoadout(false, this.loadout); return;
       case 'round': {
         const won = e.winner === me;
         const draw = e.winner < 0;
@@ -521,7 +523,7 @@ export class Game {
     const closest = a.clone().addScaledVector(ab, t);
     if (e.hit === 0 || closest.distanceTo(cam) > 0.4) { if (closest.distanceTo(cam) < 2.5 && t > 0.02 && t < 0.98) audio.whiz({ x: closest.x, y: closest.y, z: closest.z }); }
     // brass from the opponent's weapon
-    if (this.opChar && def.slot === 0 || def.id === 'deagle') {
+    if (this.opChar && (def.slot === 0 || def.id === 'deagle')) {
       const ej = this.opChar!.ejectWorld(new THREE.Vector3());
       const r = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), this.opChar!.root.rotation.y);
       this.fx.shell(ej, r, new THREE.Vector3(0, 1, 0), def.id === 'awp' ? 1.8 : 1);
@@ -636,11 +638,12 @@ export class Game {
     let dt = (now - this.lastFrame) / 1000;
     this.lastFrame = now;
     if (!(dt > 0)) return;
+    this.frameT0 = performance.now();
     this.frameMs.push(dt * 1000);
-    if (this.frameMs.length > 600) this.frameMs.shift();
+    if (this.frameMs.length > 600) { this.frameMs.shift(); this.logicMs.shift(); this.renderMs.shift(); }
     this.fpsAcc += dt; this.fpsFrames++;
     if (this.fpsAcc >= 0.5) { this.fps = this.fpsFrames / this.fpsAcc; this.fpsAcc = 0; this.fpsFrames = 0; }
-    dt = Math.min(dt, 0.1);
+    dt = Math.min(dt, 0.25);
 
     // mouse look (every frame for low latency)
     const look = this.input.consumeLook();
@@ -660,14 +663,14 @@ export class Game {
     if (!this.paused || this.testOverride) {
       this.acc += dt;
       let n = 0;
-      while (this.acc >= DT && n < 6) { this.fixedTick(); this.acc -= DT; n++; }
-      if (n === 6) this.acc = 0;
+      while (this.acc >= DT && n < 15) { this.fixedTick(); this.acc -= DT; n++; }
+      if (n === 15) this.acc = 0;
     } else {
       // keep the sim ticking with neutral input so the server keeps acking (pointer unlocked / menu open)
       this.acc += dt;
       let n = 0;
-      while (this.acc >= DT && n < 6) { this.fixedTick(); this.acc -= DT; n++; }
-      if (n === 6) this.acc = 0;
+      while (this.acc >= DT && n < 15) { this.fixedTick(); this.acc -= DT; n++; }
+      if (n === 15) this.acc = 0;
     }
 
     this.render(dt);
@@ -731,7 +734,7 @@ export class Game {
       this.vm.update(dt, p, this.lookDX, this.lookDY, speed / (5.8 * def.moveSpeed), !!(scoped && this.fov < (def.scope!.fovs[0] + 4)));
       this.lookDX *= 0.5; this.lookDY *= 0.5;
       // view-space light: dim the viewmodel in shade
-      stage.viewShade = this.world.raycast(cam.position.x, cam.position.y, cam.position.z, 0.42, 0.74, 0.52, 40) ? 0.3 : 1;
+      stage.viewShade = this.world.raycast(cam.position.x, cam.position.y, cam.position.z, SUN_DIR.x, SUN_DIR.y, SUN_DIR.z, 40) ? 0.3 : 1;
 
       audio.setListener(cam.position, viewYaw, viewPitch);
       this.driveReloadSounds(p, def);
@@ -762,7 +765,10 @@ export class Game {
     for (const d of this.dummies) d.bar.quaternion.copy(cam.quaternion);
 
     this.fx?.update(dt);
+    const tR = performance.now();
+    this.logicMs.push(tR - this.frameT0);
     stage.render(dt);
+    this.renderMs.push(performance.now() - tR);
   }
 
   private driveReloadSounds(p: PlayerState, def: ReturnType<typeof currentWeapon>): void {
@@ -805,10 +811,8 @@ export class Game {
     else if (this.phase === 'roundEnd') h.setTimer(0, `Round ${this.round}`);
     else if (this.phase === 'matchEnd') h.setTimer(0, 'Match over');
     else h.setTimer(0, 'Paused');
-    if (this.phase === 'prep') h.persistentBanner(`Round ${this.round}`, `Choose your weapons — starts in ${Math.ceil(remaining)}s`, '#ffffff');
-    else if (this.phase === 'live' && this.bannerWasPrep) { this.hud.clearBanner(); }
-    this.bannerWasPrep = this.phase === 'prep';
-    if (this.phase === 'live') this.lastLiveClear();
+    if (this.phase === 'prep') { h.persistentBanner(`Round ${this.round}`, `Choose your weapons — starts in ${Math.ceil(remaining)}s`, '#ffffff'); this.prepBannerShown = true; }
+    else if (this.prepBannerShown) { this.prepBannerShown = false; h.clearBanner(); }
     this.updateNet();
     // scoreboard
     const held = this.input.isDown(settings.bindings.scoreboard) || this.phase === 'matchEnd';
@@ -817,8 +821,7 @@ export class Game {
       this.renderScoreboard(held);
     }
   }
-  private bannerWasPrep = false;
-  private lastLiveClear(): void { /* banner cleared via event */ }
+  private prepBannerShown = false;
 
   private renderScoreboard(show: boolean): void {
     if (!show) { this.hud.scoreboard(false); return; }
@@ -846,11 +849,12 @@ export class Game {
 
   // ====================================================================== test / benchmark helpers
   /** Returns average / percentile frame stats for the last N frames. */
-  frameStats(): { avgMs: number; p95Ms: number; fps: number; frames: number } {
+  frameStats(): { avgMs: number; p95Ms: number; fps: number; frames: number; logicAvgMs: number; renderCallAvgMs: number } {
     const a = [...this.frameMs].sort((x, y) => x - y);
-    if (!a.length) return { avgMs: 0, p95Ms: 0, fps: 0, frames: 0 };
-    const avg = a.reduce((s, v) => s + v, 0) / a.length;
-    return { avgMs: avg, p95Ms: a[Math.floor(a.length * 0.95)], fps: 1000 / avg, frames: a.length };
+    if (!a.length) return { avgMs: 0, p95Ms: 0, fps: 0, frames: 0, logicAvgMs: 0, renderCallAvgMs: 0 };
+    const mean = (v: number[]) => (v.length ? v.reduce((s, x) => s + x, 0) / v.length : 0);
+    const avg = mean(a);
+    return { avgMs: avg, p95Ms: a[Math.floor(a.length * 0.95)], fps: 1000 / avg, frames: a.length, logicAvgMs: mean(this.logicMs), renderCallAvgMs: mean(this.renderMs) };
   }
   debugState() {
     return {

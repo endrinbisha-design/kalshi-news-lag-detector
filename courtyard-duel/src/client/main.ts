@@ -268,5 +268,45 @@ async function boot(): Promise<void> {
   setScreen(inviteToken ? 'join' : 'menu');
 }
 
-(window as any).__app = { setScreen, startLock, version: PROTOCOL_VERSION, host };
-void boot();
+// ------------------------------------------------------------------ URL overrides + benchmark (testing / measuring)
+function applyUrlOverrides(): void {
+  const p = q.get('preset'); if (p === 'low' || p === 'medium' || p === 'high') settings.preset = p;
+  const sc = Number(q.get('scale')); if (sc >= 0.25 && sc <= 1) settings.renderScale = sc;
+  const res = q.get('res'); if (res && /^\d+x\d+$/.test(res)) settings.resolution = res as any;
+  if (q.get('fps')) settings.showFps = true;
+}
+
+/** 10 s scripted fly-through in the practice range: walking, turning, firing (effects on), then reports frame times. */
+async function runBenchmark(seconds: number): Promise<void> {
+  game.startPractice('bench');
+  setScreen('none');
+  await new Promise((r) => setTimeout(r, 1200));
+  game.frameMs.length = 0;
+  const t0 = performance.now();
+  let n = 0;
+  await new Promise<void>((resolve) => {
+    const step = () => {
+      const t = (performance.now() - t0) / 1000;
+      if (t >= seconds) { resolve(); return; }
+      const fire = Math.floor(t * 2) % 2 === 0;
+      game.testOverride = { buttons: (Math.floor(t / 2.5) % 2 === 0 ? 1 : 0) | (fire ? 128 : 0), yaw: -Math.PI / 2 + Math.sin(t * 0.7) * 1.4, pitch: Math.sin(t * 1.3) * 0.12 };
+      n++;
+      requestAnimationFrame(step);
+    };
+    step();
+  });
+  game.testOverride = null;
+  const st = game.frameStats();
+  const info = {
+    ...st, seconds, preset: settings.preset, renderScale: settings.renderScale, resolution: settings.resolution,
+    internal: [game.stage.internalW, game.stage.internalH], drawCalls: game.stage.renderer.info.render.calls, triangles: game.stage.renderer.info.render.triangles, geometries: game.stage.renderer.info.memory.geometries, textures: game.stage.renderer.info.memory.textures,
+    gpu: (() => { try { const gl = game.stage.renderer.getContext(); const e = gl.getExtension('WEBGL_debug_renderer_info'); return e ? gl.getParameter(e.UNMASKED_RENDERER_WEBGL) : 'unknown'; } catch { return 'unknown'; } })(),
+    userAgent: navigator.userAgent, cores: navigator.hardwareConcurrency, frames: n,
+  };
+  (window as any).__bench = info;
+  console.log('[bench] ' + JSON.stringify(info));
+}
+
+(window as any).__app = { setScreen, startLock, version: PROTOCOL_VERSION, host, runBenchmark };
+applyUrlOverrides();
+void boot().then(() => { if (q.get('bench')) void runBenchmark(Number(q.get('bench')) > 1 ? Number(q.get('bench')) : 10); });

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { WeaponId } from '../../../shared/config';
 import { P, Mats, bar, box, curve, group, mats, mesh, side } from './kit';
+import { mergeByMaterial } from './optimize';
 
 export type WeaponKind = 'rifle' | 'pistol' | 'sniper' | 'smg';
 
@@ -25,6 +26,7 @@ export interface WeaponModel {
 const v = (x: number, y: number, f: number) => new THREE.Vector3(x, y, -f);
 
 function finish(id: WeaponId, kind: WeaponKind, root: THREE.Group, o: Omit<WeaponModel, 'id' | 'kind' | 'root' | 'muzzle' | 'eject'> & { muzzleAt: THREE.Vector3; ejectAt: THREE.Vector3 }): WeaponModel {
+  mergeByMaterial(root);
   const muzzle = new THREE.Object3D(); muzzle.name = 'muzzle'; muzzle.position.copy(o.muzzleAt); root.add(muzzle);
   const eject = new THREE.Object3D(); eject.name = 'eject'; eject.position.copy(o.ejectAt); root.add(eject);
   root.traverse((c) => { if ((c as THREE.Mesh).isMesh) { c.castShadow = true; c.receiveShadow = true; } });
@@ -74,7 +76,7 @@ function buildAK(m: Mats): WeaponModel {
   return finish('ak47', 'rifle', root, {
     muzzleAt: v(0, 0.026, 0.552), ejectAt: v(0.02, 0.03, 0.05),
     gripR: v(0, -0.07, -0.03), gripL: v(0, -0.004, 0.27), magwell: v(0, -0.11, 0.08),
-    fp: { pos: new THREE.Vector3(0.12, -0.17, -0.5), rot: new THREE.Euler(0.01, 0.02, 0) }, length: 0.9,
+    fp: { pos: new THREE.Vector3(0.16, -0.205, -0.6), rot: new THREE.Euler(0.02, 0.05, 0) }, length: 0.9,
   });
 }
 
@@ -116,7 +118,7 @@ function buildM4(m: Mats): WeaponModel {
   return finish('m4a4', 'rifle', root, {
     muzzleAt: v(0, 0.034, 0.705), ejectAt: v(0.02, 0.04, 0.05),
     gripR: v(0, -0.09, -0.03), gripL: v(0, 0.0, 0.32), magwell: v(0, -0.12, 0.07),
-    fp: { pos: new THREE.Vector3(0.12, -0.18, -0.5), rot: new THREE.Euler(0.01, 0.02, 0) }, length: 1.0,
+    fp: { pos: new THREE.Vector3(0.16, -0.21, -0.6), rot: new THREE.Euler(0.02, 0.05, 0) }, length: 1.0,
   });
 }
 
@@ -170,7 +172,7 @@ function buildAWP(m: Mats): WeaponModel {
   return finish('awp', 'sniper', root, {
     muzzleAt: v(0, 0.026, 0.845), ejectAt: v(0.025, 0.034, 0.02),
     gripR: v(0, -0.105, -0.045), gripL: v(0, -0.02, 0.28), magwell: v(0, -0.06, 0.1),
-    fp: { pos: new THREE.Vector3(0.12, -0.18, -0.5), rot: new THREE.Euler(0.01, 0.015, 0) }, length: 1.2, scope: true,
+    fp: { pos: new THREE.Vector3(0.17, -0.235, -0.78), rot: new THREE.Euler(0.02, 0.05, 0) }, length: 1.2, scope: true,
   });
 }
 
@@ -211,7 +213,7 @@ function buildMP5(m: Mats): WeaponModel {
   return finish('mp5', 'smg', root, {
     muzzleAt: v(0, 0.034, 0.465), ejectAt: v(0.02, 0.018, 0.06),
     gripR: v(0, -0.092, -0.07), gripL: v(0, -0.0, 0.3), magwell: v(0, -0.12, 0.09),
-    fp: { pos: new THREE.Vector3(0.12, -0.17, -0.48), rot: new THREE.Euler(0.01, 0.02, 0) }, length: 0.7,
+    fp: { pos: new THREE.Vector3(0.16, -0.2, -0.56), rot: new THREE.Euler(0.02, 0.05, 0) }, length: 0.7,
   });
 }
 
@@ -241,7 +243,7 @@ function buildDeagle(m: Mats): WeaponModel {
   return finish('deagle', 'pistol', root, {
     muzzleAt: v(0, 0.026, 0.233), ejectAt: v(0.018, 0.04, 0.05),
     gripR: v(0, -0.05, -0.01), gripL: v(0.0, -0.05, 0.0), magwell: v(0, -0.12, -0.012),
-    fp: { pos: new THREE.Vector3(0.09, -0.13, -0.42), rot: new THREE.Euler(0.02, 0.02, 0) }, length: 0.27,
+    fp: { pos: new THREE.Vector3(0.115, -0.15, -0.42), rot: new THREE.Euler(0.03, 0.04, 0) }, length: 0.27,
   });
 }
 
@@ -273,7 +275,7 @@ function buildGlock(m: Mats): WeaponModel {
   return finish('glock', 'pistol', root, {
     muzzleAt: v(0, 0.024, 0.132), ejectAt: v(0.014, 0.036, 0.04),
     gripR: v(0, -0.05, -0.015), gripL: v(0, -0.05, -0.015), magwell: v(0, -0.105, -0.018),
-    fp: { pos: new THREE.Vector3(0.09, -0.13, -0.42), rot: new THREE.Euler(0.02, 0.02, 0) }, length: 0.2,
+    fp: { pos: new THREE.Vector3(0.115, -0.15, -0.42), rot: new THREE.Euler(0.03, 0.04, 0) }, length: 0.2,
   });
 }
 

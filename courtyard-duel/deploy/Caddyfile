@@ -1,0 +1,6 @@
+# Self-hosted VPS: Caddy obtains and renews a Let's Encrypt certificate automatically and proxies WebSockets with no extra config.
+# Point an A/AAAA record for the domain at your server, open ports 80+443, run the game on 127.0.0.1:8080.
+duel.example.com {
+	encode zstd gzip
+	reverse_proxy 127.0.0.1:8080
+}

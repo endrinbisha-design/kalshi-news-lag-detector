@@ -55,6 +55,7 @@ export class Stage {
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.maxAnisotropy = this.renderer.capabilities.getMaxAnisotropy();
+    this.renderer.info.autoReset = false; // accumulate across composer passes; reset per frame in render()
 
     this.camera = new THREE.PerspectiveCamera(70, 16 / 9, 0.05, 400);
     this.viewCamera = new THREE.PerspectiveCamera(58, 16 / 9, 0.01, 10);
@@ -199,6 +200,7 @@ export class Stage {
     // dim the viewmodel's sun when the player stands in shadow
     const target = this.viewShade;
     this.viewSun.intensity += (3.0 * target - this.viewSun.intensity) * Math.min(1, dt * 8);
+    this.renderer.info.reset();
     if (this.composer) this.composer.render(dt);
     else {
       this.renderer.clear();

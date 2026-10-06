@@ -12,7 +12,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'src/client/index.html'),
-        preview: resolve(__dirname, 'src/client/preview.html'),
+        // developer-only model/map preview page: `INCLUDE_PREVIEW=1 npm run build:client`
+        ...(process.env.INCLUDE_PREVIEW ? { preview: resolve(__dirname, 'src/client/preview.html') } : {}),
       },
     },
   },

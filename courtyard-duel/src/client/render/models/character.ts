@@ -2,7 +2,8 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { WEAPONS, WeaponId } from '../../../shared/config';
 import { lerp } from '../../../shared/math';
-import { HandRig, curlHand, makeHand, makeSegment, placeSegment, solveTwoBone } from './limbs';
+import { HandRig, curlHand, freezeHand, makeHand, makeSegment, placeSegment, solveTwoBone } from './limbs';
+import { mergeByMaterial } from './optimize';
 import { Mats, mats, mesh } from './kit';
 import { WeaponModel, createWeapon } from './weapons';
 
@@ -61,6 +62,7 @@ export class Character {
     const boot = new THREE.MeshStandardMaterial({ color: 0x1c1a18, roughness: 0.75, metalness: 0 });
     const accent = new THREE.MeshStandardMaterial({ color: style.accent, roughness: 0.6, metalness: 0.1 });
 
+    this.hips.name = 'hips'; this.torso.name = 'torso'; this.head.name = 'head';
     this.root.add(this.hips);
     this.hips.add(this.torso);
     // ---- pelvis + belt
@@ -87,6 +89,7 @@ export class Character {
     const strap = mesh(new THREE.TorusGeometry(0.108, 0.012, 6, 24), m.rubber); strap.rotation.x = Math.PI / 2; strap.position.y = 0.012; strap.scale.set(0.95, 1.08, 1); this.head.add(strap);
     const nvg = mesh(new THREE.BoxGeometry(0.05, 0.04, 0.04), m.black); nvg.position.set(0, 0.09, -0.115); this.head.add(nvg);
 
+    mergeByMaterial(this.hips, new Set(['torso', 'head']));
     // ---- limbs (segments stretched each frame)
     const armMat = shirt;
     for (let i = 0; i < 4; i++) { const s = makeSegment(i % 2 ? 0.038 : 0.046, i % 2 ? 0.034 : 0.04, armMat); this.armSegs.push(s); this.root.add(s); }
@@ -100,6 +103,8 @@ export class Character {
     for (let i = 0; i < 2; i++) { const f = mkFoot(); this.feet.push(f); this.root.add(f); }
     // knee pads / joints
     this.rHand = makeHand('right'); this.lHand = makeHand('left');
+    curlHand(this.rHand, [0.95, 1, 1.05, 1.1], 0.4, 0.3, 'right'); curlHand(this.lHand, [0.95, 1, 1.05, 1.1], 0.4, 0.3, 'left');
+    freezeHand(this.rHand); freezeHand(this.lHand);
     this.root.add(this.rHand.root, this.lHand.root);
     this.root.add(this.weaponMount);
     this.root.traverse((o) => { if ((o as THREE.Mesh).isMesh) { o.castShadow = true; o.receiveShadow = true; } });
