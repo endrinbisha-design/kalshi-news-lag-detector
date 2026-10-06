@@ -13,48 +13,48 @@ quantisation section — are deliberately frozen at what was known when the call
 and should not be refreshed. Everything else tracks the latest run.
 
 This document exists because on 09-11 I claimed the preliminary CLI had beaten the
-six-hour group and that "the ordering is reversed." **Tested across all 65 days, that is
+six-hour group and that "the ordering is reversed." **Tested across all 66 days, that is
 wrong.** The groups are settlement-grade and the preliminary is not.
 
 ## The scoreboard
 
 | source | available | matches settlement |
 |---|---|---|
-| morning group (8 AM–2 PM) | 1:51 PM | 27/65 — **42 %** |
-| preliminary CLI | ~4:31–5:14 PM ‡ | 32/42 — **76 %** |
-| afternoon group (2 PM–8 PM) | 7:51 PM | 55/65 — **85 %** † |
-| **max of ALL same-day groups** | **7:51 PM** | **64/65 — 98 %** |
+| morning group (8 AM–2 PM) | 1:51 PM | 28/66 — **42 %** |
+| preliminary CLI | ~4:31–5:14 PM ‡ | 33/43 — **77 %** |
+| afternoon group (2 PM–8 PM) | 7:51 PM | 55/66 — **83 %** † |
+| **max of ALL same-day groups** | **7:51 PM** | **65/66 — 98 %** |
 
 ‡ **Not always.** On 2026-09-28 the preliminary was issued at **9:41 PM**, absent from
 both api.weather.gov and IEM AFOS through 5:47 PM — a real absence, not a feed miss. It
 still carried "VALID TODAY AS OF 0400 PM" and still counts as a preliminary. Anything that
-assumes the preliminary is in hand by ~5:15 PM now has one counterexample in 42; 09-29's was back at 4:43 PM.
+assumes the preliminary is in hand by ~5:15 PM now has one counterexample in 43; 09-29's was back at 4:43 PM.
 
-† **That 85 % is partly a free ride — see "The afternoon group is not always an
+† **That 83 % is partly a free ride — see "The afternoon group is not always an
 independent measurement" below.** On the 18 days where it repeats the morning group it
-scores 18/18; on the other 47 it scores 37/47 = 79 %. **The partition behind those two
-numbers is itself known to be wrong in at least one case, so treat 79 % as indicative
+scores 18/18; on the other 48 it scores 37/48 = 77 %. **The partition behind those two
+numbers is itself known to be wrong in at least one case, so treat 77 % as indicative
 rather than measured.**
 
 **That last row says "all same-day groups" for a reason, and the wording is a correction.**
 It originally read "max of both groups" and was computed from the morning and afternoon
 groups only. 2026-09-14 broke it: an overnight-max day settling at 75, where morning
 (73.04) and afternoon (73.94) both round to 74, while the **2 AM–8 AM group reads 75.02**
-and was never consulted. Across the 65 days, daytime-only would miss **two** — 08-27 and
+and was never consulted. Across the 66 days, daytime-only would miss **two** — 08-27 and
 09-14 — where all-same-day-groups misses one. The 98 % was under-specified, not wrong; two
 of three available groups were going in, and no earlier day in the run stressed it.
 
 Read the timing column before the accuracy column; these are not competing at the same
 hour.
 
-* **At 4:40 PM the preliminary is the best thing available** — 76 % against the morning
+* **At 4:40 PM the preliminary is the best thing available** — 77 % against the morning
   group's 42 %. That much of the 09-11 observation survives.
 * **Waiting until 7:51 PM beats it decisively.** Max of all same-day groups is 98 %. The claim that
   the preliminary supersedes the group was generalised from a single favourable day and
   does not hold.
 * The one failure of max-of-all-same-day-groups is **2026-08-27**, the sensor-contamination day
   where a 9-minute spike during heavy rain entered the group and the CLI's QC rejected it
-  (group 81, settled 77). That remains the only day in 65 where a group was wrong and the
+  (group 81, settled 77). That remains the only day in 66 where a group was wrong and the
   CLI right — so it is one exception, not a pattern, but it is the reason the 98 % is not
   100 %.
 
@@ -67,13 +67,13 @@ Day twenty-eight was a +2.
 
 | settled − preliminary | days | share |
 |---|---|---|
-| **+0 °F** | 32 | **76 %** |
+| **+0 °F** | 33 | **77 %** |
 | **+1 °F** | 9 | **21 %** |
 | **+2 °F** | **1** | **2 %** |
 | negative | **0** | **0 %** |
 
 The nine misses are 08-03, 08-17, 08-25, 08-30, 09-01, 09-03, 09-06, 09-13 (all +1) and
-**09-20 (+2)**. The never-negative direction still holds at 42/42 — **but see the minimum
+**09-20 (+2)**. The never-negative direction still holds at 43/43 — **but see the minimum
 section below, which shows what that record does and does not protect against.**
 
 **The +2 is a different mechanism, not a bigger version of the +1.** On 09-20 the
@@ -85,7 +85,7 @@ preliminary measuring a different part of the day altogether. **Rain-clearing ev
 warm advection are their own mode, and autumn produces more of them, not fewer.**
 
 The split has read 63/37, 65/35, 62/38, 64/36, 65/35, 67/33, 68/32, 69/31, 70/30, 68/29/4
-then **69/28/3** across eleven successive days, and has since drifted to **76/21/2** (42 preliminaries, through 10-04). Quote it from the script, never from memory — and
+then **69/28/3** across eleven successive days, and has since drifted to **77/21/2** (43 preliminaries, through 10-05). Quote it from the script, never from memory — and
 note that the thing which had "held across all nine" was exactly the thing that broke.
 
 **Read this as a lesson about the shape of the claim, not just the numbers.** A
@@ -99,10 +99,10 @@ So the preliminary gives a **one-sided distribution over the preliminary and the
 integers above it**, known at ~4:40 PM:
 
 ```
-P(settle = preliminary)     ≈ 0.76
+P(settle = preliminary)     ≈ 0.77
 P(settle = preliminary + 1) ≈ 0.21
-P(settle = preliminary + 2) ≈ 0.02     <- 1 day in 42, added 09-20
-P(settle < preliminary)     ≈ 0        (0/42, but see the caveat below)
+P(settle = preliminary + 2) ≈ 0.02     <- 1 day in 43, added 09-20
+P(settle < preliminary)     ≈ 0        (0/43, but see the caveat below)
 ```
 
 The never-below half rests on a mechanism — the preliminary can only be *beaten* by what
@@ -144,13 +144,13 @@ Against real ladders:
 
 | | days | result |
 |---|---|---|
-| both integers in one bucket | 28/42 (67 %) | bucket correct **28/28** |
+| both integers in one bucket | 29/43 (67 %) | bucket correct **29/29** |
 | …of which the open-ended bucket | **8** | certainty is nearly free |
-| …**genuine 2-wide bucket** | **20** | **20/20 correct** |
-| integers straddle a boundary | 14/42 (33 %) | majority side won **12/14** |
+| …**genuine 2-wide bucket** | **21** | **21/21 correct** |
+| integers straddle a boundary | 14/43 (33 %) | majority side won **12/14** |
 
-So the split flags a genuine narrow-bucket on **20 days in 42 — not 4 — and was right on
-all twenty.** The straddle days went 12/14 to the majority side, not 2/4.
+So the split flags a genuine narrow-bucket on **21 days in 43 — not 4 — and was right on
+all twenty-one.** The straddle days went 12/14 to the majority side, not 2/4.
 
 **But "near-certainty" was the wrong word, and 09-20's +2 shows why it was structurally
 wrong rather than just optimistic.** A 2-wide bucket `[lo, lo+1]` can only contain both
@@ -169,7 +169,7 @@ still 14/14; it is the forward-looking claim that changes, and it changes from
 marginally-positive to marginally-negative. 09-20's own preliminary sat in the open-ended
 `<=70` bucket, where +2 is harmless, which is the only reason the record is intact.
 
-**And it is still not tradeable, for the other reason.** Pricing those twenty buckets from
+**And it is still not tradeable, for the other reason.** Pricing those twenty-one buckets from
 the 17:00 candle on the day (now derived by the script, see below):
 
 ```
@@ -179,12 +179,12 @@ the 17:00 candle on the day (now derived by the script, see below):
 09-15  72-73  100c     09-16  77-78  100c     09-17  82-83  100c
 09-18  80-81  100c     09-19  69-70   99c     09-21  72-73  100c
 09-23  67-68  100c     09-24  66-67   98c     09-25  69-70  100c
-10-02  83-84   98c     10-03  70-71   99c
+10-02  83-84   98c     10-03  70-71   99c     10-05  68-69  100c
 ```
 
-20/20 correct (09-27's preliminary sat in an open-ended bucket, so it is not in this list),
+21/21 correct (09-27's preliminary sat in an open-ended bucket, so it is not in this list),
 mean ask **98.9 ¢**, ten of them at exactly 100 ¢. Net **+1.0 % per bet**,
-+$2.07 on twenty $10 stakes, before any slippage or depth check. That is `EDGE_DECAY.md`
++$2.07 on twenty-one $10 stakes, before any slippage or depth check. That is `EDGE_DECAY.md`
 again — the same wall `PRELIM_FALLING` hit at exactly $1.00, just a whisker above zero
 instead of on it.
 
@@ -224,7 +224,7 @@ It is not a one-off. Across the 49 days:
 
 | | days |
 |---|---|
-| afternoon group **exactly equals** the morning group | **18/65** — upper bound |
+| afternoon group **exactly equals** the morning group | **18/66** — upper bound |
 | …and also exceeds every snapshot inside its own window | **13** |
 
 Twelve exact ties, each landing precisely on the morning maximum, looked far more
