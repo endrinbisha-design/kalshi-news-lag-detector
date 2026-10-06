@@ -20,7 +20,7 @@ const W = Number(process.env.W ?? 1280), H = Number(process.env.H ?? 720);
 async function open(ctx: BrowserContext, url: string): Promise<Page> {
   const p = await ctx.newPage();
   await p.addInitScript((s) => { try { if (!localStorage.getItem('courtyard-duel.settings.v1')) localStorage.setItem('courtyard-duel.settings.v1', s); } catch { /* */ } }, settings);
-  await p.goto(url);
+  await p.goto(url, { timeout: 240000, waitUntil: 'commit' });
   await p.waitForFunction(() => (window as any).__game?.loaded, null, { timeout: 180000 });
   return p;
 }
