@@ -111,7 +111,7 @@ Walls, crates and the car block shots (no penetration).
 
 Target: smooth 60 FPS at 1920×1080 on a typical modern laptop with the **Medium** preset; **Low** is for weak iGPUs
 (no MSAA/AO, 1k shadows) and **High** adds ambient occlusion + bloom + 4k shadows.
-I could only test with CPU software rendering (no GPU in the sandbox), so I do **not** claim a measured laptop FPS — the
+I could only test with CPU software rendering (no GPU in the sandbox; 0.9–2.2 FPS at 640×360), so I do **not** claim a measured laptop FPS — the
 numbers I got and how to measure your own are in [docs/TEST_REPORT.md](docs/TEST_REPORT.md#performance). In your browser
 press <kbd>Esc</kbd> → Settings → Video → *Show FPS*, or open the game with `?bench=1` to run a 10 s fly-through benchmark
 and print average/p95 frame time to the console.

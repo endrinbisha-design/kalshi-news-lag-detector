@@ -63,12 +63,24 @@ Total: 45 automated tests + 23 browser checks.
 (SwiftShader, 4 cores), which is typically 50–200× slower than a laptop iGPU for this kind of scene; it is useful for
 *relative* numbers and for checking JS cost, not as a prediction.
 
-PERF_TABLE_PLACEHOLDER
+Measured with `SECS=6 RES=640x360 npm run perf` ([`perf-360p.log`](perf-360p.log)) (in-game fly-through in the **practice range**: 8 dummy characters, walking, turning,
+firing). Environment: Intel Xeon 2.1 GHz × 4 cores, 16 GiB, Linux, Chromium + SwiftShader (CPU "GPU"), Node 22.
 
-What the numbers do tell us (device-independent): per-frame **JavaScript cost** (simulation, interpolation, effects, HUD, animation
-before the render call) is `logicMs` below — on the order of a millisecond or two, so a 60 FPS (16.7 ms) budget is dominated
-by GPU/driver work; **draw calls** are in the low tens thanks to merged geometry (static map ≈ 15 meshes, weapons merged per
-material, characters ≈ 40 meshes), and triangle counts are in the hundreds of thousands at most.
+| Preset | Internal res | Avg FPS | Avg frame | p95 frame | JS logic / frame* | Draw calls | Triangles |
+|---|---|---|---|---|---|---|---|
+| Low | 640×360 | 2.2 | 455 ms | 1433 ms | 12 ms | 431 | 208 k |
+| Medium | 640×360 | 1.0 | 1025 ms | 2367 ms | 23 ms | 490 | 257 k |
+| High | 640×360 | 0.9 | 1142 ms | 2333 ms | 29 ms | 843 | 421 k |
+
+A first attempt at 1920×1080 ([`perf-1080p.log`](perf-1080p.log)) gave 0.2–0.4 FPS, i.e. several seconds per frame. These are **software-rendering
+results and say nothing about a laptop GPU**; the container's 4 CPU cores were rendering *and* running the JS, so the
+"JS logic" column (12–29 ms) is inflated by contention and should not be read as the true CPU cost either. Honest summary:
+**actual 60 FPS at 1080p is unverified**.
+
+What the counters do tell us (device-independent): draw calls include the shadow pass (scene drawn twice) and, on High, GTAO's
+extra normal/depth pass. The practice range is the worst case because it spawns 8 dummy characters (~40 meshes each); a real
+duel has one opponent, so expect roughly 150–250 draw calls on Low/Medium and fewer than 450 on High, and 200–420 k triangles —
+typical of what integrated laptop GPUs handle at 60 FPS, but I have not been able to confirm that.
 
 Design measures taken for a typical laptop: merged static geometry, merged weapon/character meshes, single-draw-call GPU
 particles, pooled decals/tracers/shells, constant light count (no shader recompiles), shadow map 1k/2k/4k per preset,
