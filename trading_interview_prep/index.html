@@ -1,0 +1,733 @@
+<title>Trading Interview Daily Prep</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: a trader's morning sheet — run line and tiles on top, the checklist as a single column of drill blocks, then progress and the day-by-day ledger. */
+:root {
+  --bg: #eef1f5;
+  --surface: #ffffff;
+  --sunk: #f6f8fb;
+  --fg: #131a26;
+  --muted: #586378;
+  --line: #d8dee8;
+  --accent: #2443b5;
+  --accent-ink: #ffffff;
+  --accent-soft: #e3e8fa;
+  --got: #17784a;
+  --got-soft: #dff2e7;
+  --miss: #b0352a;
+  --miss-soft: #f8e1de;
+  --warn: #8d5c08;
+  --display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d1118; --surface: #151b25; --sunk: #111720; --fg: #e5e9f1; --muted: #97a1b4; --line: #263042;
+    --accent: #8fa6ff; --accent-ink: #0d1118; --accent-soft: #1b2546; --got: #5cc690; --got-soft: #12301f;
+    --miss: #f08a7e; --miss-soft: #3a1b18; --warn: #e9b65c; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d1118; --surface: #151b25; --sunk: #111720; --fg: #e5e9f1; --muted: #97a1b4; --line: #263042;
+  --accent: #8fa6ff; --accent-ink: #0d1118; --accent-soft: #1b2546; --got: #5cc690; --got-soft: #12301f;
+  --miss: #f08a7e; --miss-soft: #3a1b18; --warn: #e9b65c; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; line-height: 1.5; }
+.wrap { max-width: 880px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 72px; display: grid; gap: 28px; }
+h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+h1 { font-size: 2.1rem; line-height: 1.05; font-weight: 800; }
+h2 { font-size: 1.35rem; font-weight: 700; }
+h3 { font-size: 1.02rem; font-weight: 700; }
+p { margin: 0; }
+.eyebrow { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button, input, textarea, select { font: inherit; color: var(--fg); }
+button { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 7px 12px; cursor: pointer; font-weight: 600; font-size: 0.9rem; }
+button:hover { border-color: var(--accent); }
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+button.ghost { background: transparent; }
+button:disabled { opacity: 0.5; cursor: default; }
+input[type="number"], input[type="text"], textarea { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 7px 9px; min-width: 0; width: 100%; }
+textarea { resize: vertical; min-height: 2.6em; }
+a { color: var(--accent); }
+a.btnlink { display: inline-block; text-decoration: none; background: var(--accent); color: var(--accent-ink); border-radius: 6px; padding: 7px 12px; font-weight: 600; font-size: 0.9rem; }
+
+/* header */
+header { display: grid; gap: 10px; }
+.topline { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.runline { display: flex; flex-wrap: wrap; gap: 6px 14px; font-family: var(--mono); font-size: 0.78rem; color: var(--muted); }
+.runline b { color: var(--fg); font-weight: 500; }
+.theme { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.theme button { border: 0; border-radius: 0; padding: 4px 10px; font-size: 0.78rem; font-weight: 500; background: var(--surface); color: var(--muted); }
+.theme button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); }
+nav.jump { display: flex; gap: 6px; flex-wrap: wrap; }
+nav.jump a { font-size: 0.85rem; font-weight: 600; text-decoration: none; border: 1px solid var(--line); background: var(--surface); padding: 4px 10px; border-radius: 999px; color: var(--fg); }
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 2px; }
+.tile .n { font-family: var(--display); font-size: 1.8rem; font-weight: 700; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.tile .l { font-size: 0.78rem; color: var(--muted); }
+@media (max-width: 560px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } h1 { font-size: 1.75rem; } }
+.status { font-size: 0.82rem; color: var(--muted); min-height: 1.3em; }
+.status.err { color: var(--miss); }
+.status.ok::before { content: "● "; color: var(--got); }
+.banner { background: var(--accent-soft); border-radius: 8px; padding: 10px 14px; font-size: 0.92rem; }
+
+/* checklist */
+.sec-head { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; }
+.focus { font-size: 0.92rem; color: var(--muted); max-width: 68ch; }
+.focus b { color: var(--fg); }
+.list { display: grid; gap: 12px; }
+.item { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.item-head { display: flex; align-items: center; gap: 12px; padding: 12px 14px; }
+.item.done .item-head { background: var(--got-soft); }
+.chk { appearance: none; width: 22px; height: 22px; border: 2px solid var(--muted); border-radius: 5px; margin: 0; flex: none; cursor: pointer; display: grid; place-content: center; background: var(--surface); }
+.chk:checked { background: var(--got); border-color: var(--got); }
+.chk:checked::after { content: ""; width: 10px; height: 6px; border: solid var(--surface); border-width: 0 0 2.5px 2.5px; transform: rotate(-45deg) translate(1px, -1px); }
+.item-head label { flex: 1 1 auto; cursor: pointer; min-width: 0; }
+.item-title { font-family: var(--display); font-weight: 700; font-size: 1.05rem; }
+.item-sub { display: block; font-size: 0.82rem; color: var(--muted); }
+.item-meta { font-family: var(--mono); font-size: 0.74rem; color: var(--muted); white-space: nowrap; }
+.item-body { padding: 4px 14px 14px; display: grid; gap: 12px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field label { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.field.narrow { width: 120px; }
+.field.wide { flex: 1 1 260px; }
+.hint { font-size: 0.85rem; color: var(--muted); }
+
+.prob { border: 1px solid var(--line); border-radius: 8px; padding: 12px; display: grid; gap: 10px; background: var(--sunk); }
+.prob.got { border-color: var(--got); }
+.prob.missed { border-color: var(--miss); }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.tag { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.04em; padding: 2px 7px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
+.tag.plain { background: transparent; border: 1px solid var(--line); color: var(--muted); }
+.tag.redo { background: var(--miss-soft); color: var(--miss); }
+.tag.got { background: var(--got-soft); color: var(--got); }
+.tag.missed { background: var(--miss-soft); color: var(--miss); }
+.prompt { white-space: pre-line; }
+.fu { margin: 0; padding-left: 1.3em; display: grid; gap: 4px; white-space: pre-line; }
+.ans { border-top: 1px dashed var(--line); padding-top: 10px; display: grid; gap: 8px; }
+.answer { font-weight: 600; white-space: pre-line; }
+.sol { white-space: pre-line; color: var(--fg); font-size: 0.95rem; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.mark button[aria-pressed="true"][data-act$="got"] { background: var(--got); border-color: var(--got); color: var(--surface); }
+.mark button[aria-pressed="true"][data-act$="missed"] { background: var(--miss); border-color: var(--miss); color: var(--surface); }
+
+.mm-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 18px; margin: 0; padding: 0; list-style: none; counter-reset: q; }
+.mm-grid li { counter-increment: q; display: flex; gap: 8px; align-items: baseline; padding: 4px 0; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; }
+.mm-grid li::before { content: counter(q) "."; font-family: var(--mono); font-size: 0.75rem; color: var(--muted); width: 1.6em; flex: none; }
+.mm-grid .a { margin-left: auto; font-family: var(--mono); color: var(--accent); font-weight: 600; }
+@media (max-width: 520px) { .mm-grid { grid-template-columns: minmax(0, 1fr); } }
+.clock { font-family: var(--mono); font-size: 1.5rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.redo-bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; background: var(--surface); border: 1px dashed var(--line); border-radius: 10px; padding: 12px 14px; }
+
+/* progress */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 12px; min-width: 0; }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 680px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+.chart { position: relative; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart .ax { fill: var(--muted); font-family: var(--mono); font-size: 10.5px; }
+.chart .grid { stroke: var(--line); stroke-width: 1; }
+.chart .ln { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.chart .ar { fill: var(--accent); opacity: 0.1; }
+.chart .pt { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.chart .xh { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 3; }
+.chart .lab { fill: var(--fg); font-family: var(--mono); font-size: 11px; font-weight: 600; }
+.tip { position: absolute; pointer-events: none; background: var(--fg); color: var(--bg); font-family: var(--mono); font-size: 0.75rem; padding: 4px 8px; border-radius: 5px; white-space: nowrap; transform: translate(-50%, -110%); }
+.bars { display: grid; gap: 8px; }
+.bar { display: grid; grid-template-columns: 8.5em minmax(0, 1fr) 6.5em; gap: 10px; align-items: center; font-size: 0.88rem; }
+.bar .track { height: 10px; background: var(--sunk); border-radius: 5px; overflow: hidden; border: 1px solid var(--line); }
+.bar .fill { height: 100%; background: var(--accent); border-radius: 0 4px 4px 0; }
+.bar .v { font-family: var(--mono); font-size: 0.76rem; text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+.bar .lv { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); margin-left: 4px; }
+.weak { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.weak li { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+.empty { color: var(--muted); font-size: 0.9rem; }
+.qlist { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.qlist li { display: flex; gap: 10px; align-items: center; justify-content: space-between; font-size: 0.88rem; }
+.qlist li span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.qlist button { padding: 3px 8px; font-size: 0.78rem; flex: none; }
+details.table summary { cursor: pointer; font-size: 0.82rem; color: var(--muted); }
+.tbl { overflow-x: auto; }
+.tbl table { border-collapse: collapse; font-size: 0.82rem; font-variant-numeric: tabular-nums; }
+.tbl td, .tbl th { padding: 3px 14px 3px 0; text-align: left; border-bottom: 1px solid var(--line); }
+
+/* history */
+.days { display: grid; gap: 8px; }
+details.day { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+details.day > summary { list-style: none; cursor: pointer; padding: 10px 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+details.day > summary::-webkit-details-marker { display: none; }
+details.day > summary::before { content: "▸"; color: var(--muted); font-size: 0.8rem; }
+details.day[open] > summary::before { content: "▾"; }
+.day-date { font-family: var(--display); font-weight: 700; min-width: 7.5em; }
+.day-stats { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); display: flex; gap: 12px; flex-wrap: wrap; }
+.day-body { padding: 0 14px 14px; display: grid; gap: 10px; }
+@media (prefers-reduced-motion: no-preference) { .item, .prob { transition: border-color 0.15s, background 0.15s; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="topline">
+      <span class="eyebrow">Trader &amp; quant trader recruiting · Class of 2027</span>
+      <div class="theme" role="group" aria-label="Theme">
+        <button type="button" data-theme-set="system" aria-pressed="true">Auto</button>
+        <button type="button" data-theme-set="light" aria-pressed="false">Light</button>
+        <button type="button" data-theme-set="dark" aria-pressed="false">Dark</button>
+      </div>
+    </div>
+    <h1>Trading Interview Daily Prep</h1>
+    <div class="runline" id="runline"><span>Loading your set…</span></div>
+    <section class="tiles" aria-label="Summary">
+      <div class="tile"><span class="n" id="t-streak">–</span><span class="l">Current streak (days)</span></div>
+      <div class="tile"><span class="n" id="t-best">–</span><span class="l">Best streak</span></div>
+      <div class="tile"><span class="n" id="t-today">–</span><span class="l">Checklist done today</span></div>
+      <div class="tile"><span class="n" id="t-min">–</span><span class="l">Estimated minutes</span></div>
+    </section>
+    <nav class="jump" aria-label="Sections"><a href="#today">Today</a><a href="#progress">Progress</a><a href="#history">History</a></nav>
+    <div class="status" id="savestatus" role="status"></div>
+  </header>
+
+  <section id="today" class="list" aria-labelledby="today-h">
+    <div class="sec-head">
+      <div><span class="eyebrow" id="today-eyebrow">Today</span><h2 id="today-h">Today's checklist</h2></div>
+    </div>
+    <div id="today-body" class="list">
+      <p class="empty">Your set loads here. Each morning at 6:45 AM Central a new set of problems is written in, weighted toward your weakest topics.</p>
+    </div>
+  </section>
+
+  <section id="progress" class="list" aria-labelledby="prog-h">
+    <div><span class="eyebrow">Progress</span><h2 id="prog-h">How you're trending</h2></div>
+    <div class="panel">
+      <h3>Zetamac score</h3>
+      <div class="chart" id="zchart"><p class="empty">Your Zetamac scores will chart here once you log the first one.</p></div>
+      <details class="table"><summary>Show scores as a table</summary><div class="tbl" id="ztable"></div></details>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <h3>Accuracy by topic, last 14 days</h3>
+        <div class="bars" id="acc"><p class="empty">Mark problems Got it or Missed it and your accuracy shows here.</p></div>
+        <p class="hint">L1–L5 is the current difficulty in that topic. It steps up after 3 right in a row and down after 2 misses in a row.</p>
+      </div>
+      <div class="panel">
+        <h3>Weakest topics</h3>
+        <ul class="weak" id="weak"><li class="empty">Needs a few marked problems first.</li></ul>
+        <h3>Queued for tomorrow</h3>
+        <ul class="qlist" id="queue"><li class="empty">Nothing queued. Use "Redo missed" to add missed problems.</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="history" class="list" aria-labelledby="hist-h">
+    <div><span class="eyebrow">History</span><h2 id="hist-h">Past days</h2></div>
+    <p class="hint">Open a day to retry its problems. Answers stay hidden until you ask for them.</p>
+    <div class="days" id="days"><p class="empty">Past days appear here after your first day.</p></div>
+  </section>
+</div>
+
+<script>
+const TZ = "America/Chicago";
+const SECTIONS = [
+  { key: "zetamac", title: "Zetamac", sub: "Default settings, 120 seconds", kind: "zetamac", min: 2 },
+  { key: "mental", title: "Mental math drill", sub: "10 timed problems", kind: "mental", min: 4 },
+  { key: "probability", title: "Probability", sub: "3 problems", topics: ["Probability"] },
+  { key: "brainteaser", title: "Brainteaser", sub: "1 problem", topics: ["Brainteasers"] },
+  { key: "marketmaking", title: "Market making", sub: "Make me a market", topics: ["Market making"] },
+  { key: "options", title: "Options", sub: "2 problems", topics: ["Options"] },
+  { key: "betting", title: "Betting & expected value", sub: "1 problem", topics: ["Betting & EV"] },
+  { key: "estimation", title: "Estimation or sequences", sub: "1 problem", topics: ["Estimation", "Sequences"] },
+  { key: "markets", title: "Markets", sub: "Headline, trade idea, what proves you wrong", kind: "markets", min: 3 },
+  { key: "story", title: "Story practice", sub: "Answer out loud in 60 seconds", kind: "story", min: 2 },
+];
+const TOPICS = ["Probability", "Brainteasers", "Market making", "Options", "Betting & EV", "Estimation", "Sequences", "Mental math"];
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const isObj = (v) => v && typeof v === "object" && !Array.isArray(v);
+function deepMerge(a, b) {
+  const out = isObj(a) ? { ...a } : {};
+  for (const [k, v] of Object.entries(b || {})) out[k] = isObj(v) && isObj(out[k]) ? deepMerge(out[k], v) : isObj(v) ? deepMerge({}, v) : v;
+  return out;
+}
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+const todayISO = () => new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+const dnum = (iso) => Math.round(Date.parse(iso + "T00:00:00Z") / 86400000);
+const fromDnum = (n) => new Date(n * 86400000).toISOString().slice(0, 10);
+const fmtDay = (iso, opts = { weekday: "short", month: "short", day: "numeric" }) => new Date(iso + "T12:00:00Z").toLocaleDateString(undefined, { ...opts, timeZone: "UTC" });
+const fmtRun = (iso) => { const d = new Date(iso); return isNaN(d) ? iso : d.toLocaleString(undefined, { weekday: "short", hour: "numeric", minute: "2-digit", timeZone: TZ }) + " CT"; };
+
+/* ---------- theme ---------- */
+function applyTheme(t) {
+  if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+  else document.documentElement.removeAttribute("data-theme");
+  document.querySelectorAll("[data-theme-set]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.themeSet === (t || "system"))));
+}
+applyTheme(store.get("tprep.theme"));
+document.querySelector(".theme").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-theme-set]"); if (!b) return;
+  store.set("tprep.theme", b.dataset.themeSet === "system" ? null : b.dataset.themeSet);
+  applyTheme(b.dataset.themeSet);
+});
+
+/* ---------- state ---------- */
+const state = { db: null, days: new Map(), results: new Map(), resultsLoaded: false, daysLoaded: false, queue: [], meta: null, current: null, builtKey: "", openDays: new Set(), histReveal: new Set() };
+const writers = {};
+for (const [date, p] of Object.entries(store.get("tprep.pending") || {})) writers[date] = { pending: p, inflight: null, timer: 0, tries: 0 };
+
+function view(date) {
+  let v = state.results.get(date) || {};
+  const w = writers[date];
+  if (w) { if (w.inflight) v = deepMerge(v, w.inflight); if (w.pending) v = deepMerge(v, w.pending); }
+  return v;
+}
+function persistPending() {
+  const all = {};
+  for (const [d, w] of Object.entries(writers)) { const p = deepMerge(w.inflight || {}, w.pending || {}); if (Object.keys(p).length) all[d] = p; }
+  store.set("tprep.pending", Object.keys(all).length ? all : null);
+}
+function setStatus(kind, text) { const s = $("savestatus"); s.className = "status " + (kind || ""); s.textContent = text; }
+function anyPending() { return Object.values(writers).some((w) => w.pending || w.inflight); }
+
+function patch(date, p, delay = 400) {
+  const w = (writers[date] ||= { pending: null, inflight: null, timer: 0, tries: 0 });
+  w.pending = deepMerge(w.pending || {}, p);
+  const day = state.days.get(date);
+  if (day) {
+    const done = isComplete(day, view(date));
+    if (done !== !!view(date).completed) w.pending = deepMerge(w.pending, { completed: done, completedAt: done ? new Date().toISOString() : null });
+  }
+  persistPending();
+  setStatus("", "Saving…");
+  clearTimeout(w.timer); w.timer = setTimeout(() => flush(date), delay);
+  refresh();
+}
+async function flush(date) {
+  const w = writers[date];
+  if (!w || w.inflight || !w.pending) return;
+  if (!state.db || !state.resultsLoaded) { w.timer = setTimeout(() => flush(date), 1500); return; }
+  w.inflight = w.pending; w.pending = null;
+  const ref = state.db.collection("results").doc(date);
+  try {
+    if (state.results.has(date)) await ref.update(w.inflight);
+    else await ref.set(deepMerge({ date, items: {}, marks: {}, revealed: {}, retry: {} }, w.inflight));
+    w.inflight = null; w.tries = 0; persistPending();
+    if (!anyPending()) setStatus("ok", "All changes saved");
+  } catch (err) {
+    w.pending = deepMerge(w.inflight, w.pending || {}); w.inflight = null; w.tries++; persistPending();
+    setStatus("err", "Not saved yet. Your entries are kept on this device and will retry automatically.");
+    clearTimeout(w.timer); w.timer = setTimeout(() => flush(date), Math.min(30000, 1000 * 2 ** w.tries));
+    return;
+  }
+  if (w.pending) { clearTimeout(w.timer); w.timer = setTimeout(() => flush(date), 200); }
+}
+window.addEventListener("online", () => Object.keys(writers).forEach(flush));
+
+/* ---------- derived data ---------- */
+const probsIn = (day, sec) => (day.problems || []).filter((p) => sec.topics && sec.topics.includes(p.topic));
+function sectionDone(day, v, sec) { return !!(v.items && v.items[sec.key] && v.items[sec.key].done); }
+function isComplete(day, v) { return SECTIONS.every((s) => sectionDone(day, v, s)); }
+function doneCount(day, v) { return SECTIONS.filter((s) => sectionDone(day, v, s)).length; }
+function estMinutes(day) {
+  return SECTIONS.reduce((t, s) => t + (s.topics ? probsIn(day, s).reduce((a, p) => a + (+p.minutes || 3), 0) : s.min), 0);
+}
+function completedSet() {
+  const s = new Set();
+  for (const d of new Set([...state.results.keys(), ...Object.keys(writers)])) if (view(d).completed) s.add(d);
+  return s;
+}
+function streaks() {
+  const done = completedSet();
+  const t = dnum(todayISO());
+  let n = done.has(fromDnum(t)) ? t : t - 1, cur = 0;
+  while (done.has(fromDnum(n))) { cur++; n--; }
+  const nums = [...done].map(dnum).sort((a, b) => a - b);
+  let best = 0, run = 0, prev = null;
+  for (const x of nums) { run = prev !== null && x === prev + 1 ? run + 1 : 1; best = Math.max(best, run); prev = x; }
+  return { cur, best };
+}
+function accuracy14() {
+  const from = dnum(todayISO()) - 13, tally = {};
+  for (const day of state.days.values()) {
+    if (dnum(day.date) < from) continue;
+    const v = view(day.date), marks = v.marks || {};
+    for (const p of day.problems || []) {
+      const m = marks[p.id]; if (!m) continue;
+      const t = (tally[p.topic] ||= { got: 0, total: 0 }); t.total++; if (m === "got") t.got++;
+    }
+    const mc = v.items && v.items.mental && v.items.mental.correct;
+    if (typeof mc === "number" && (day.mental || []).length) { const t = (tally["Mental math"] ||= { got: 0, total: 0 }); t.got += mc; t.total += day.mental.length; }
+  }
+  return tally;
+}
+/* Missed problems not yet fixed, keyed by the original problem id. */
+function unresolvedMissed() {
+  const attempts = {}, info = {}, scheduled = new Set();
+  const days = [...state.days.values()].sort((a, b) => a.date.localeCompare(b.date));
+  for (const day of days) {
+    const v = view(day.date);
+    for (const p of day.problems || []) {
+      const root = p.redoOf || p.id;
+      if (!info[root]) info[root] = { root, date: p.redoOf ? (p.redoFrom || day.date) : day.date, topic: p.topic, prompt: p.prompt };
+      const m = (v.marks || {})[p.id], r = (v.retry || {})[p.id];
+      if (m) (attempts[root] ||= []).push(m);
+      else if (p.redoOf) scheduled.add(root);
+      if (r) (attempts[root] ||= []).push(r);
+    }
+  }
+  const queued = new Set(state.queue.map((q) => q.id));
+  return Object.keys(attempts).filter((r) => attempts[r][attempts[r].length - 1] === "missed" && !queued.has(r) && !scheduled.has(r)).map((r) => info[r]);
+}
+
+/* ---------- today ---------- */
+function pickCurrent() {
+  const t = todayISO();
+  if (state.days.has(t)) return t;
+  const past = [...state.days.keys()].filter((d) => d <= t).sort();
+  return past.length ? past[past.length - 1] : null;
+}
+function probHTML(p, histDate) {
+  const redo = p.redoOf ? `<span class="tag redo">Redo${p.redoFrom ? " from " + esc(fmtDay(p.redoFrom, { month: "short", day: "numeric" })) : ""}</span>` : "";
+  const sub = p.sub ? ` · ${esc(p.sub)}` : "";
+  const fu = (p.followUps || []).length
+    ? `<div class="actions"><button type="button" data-act="fu">Show the interviewer's follow-ups</button></div><ol class="fu" hidden>${p.followUps.map((q) => `<li>${esc(q)}</li>`).join("")}</ol>` : "";
+  const pre = histDate ? "h" : "";
+  return `<article class="prob" data-pid="${esc(p.id)}"${histDate ? ` data-date="${esc(histDate)}"` : ""}>
+    <div class="tags"><span class="tag">${esc(p.topic)}${sub}</span><span class="tag plain">L${esc(p.level || 2)}</span><span class="tag plain">~${esc(p.minutes || 3)} min</span>${redo}<span class="tag" data-slot="mark" hidden></span></div>
+    <p class="prompt">${esc(p.prompt)}</p>
+    ${fu}
+    <div class="actions"><button type="button" data-act="reveal">Show answer</button></div>
+    <div class="ans" hidden>
+      <p class="answer">Answer: ${esc(p.answer)}</p>
+      <p class="sol">${esc(p.solution)}</p>
+      <div class="actions mark"><button type="button" data-act="${pre}got" aria-pressed="false">${histDate ? "Got it now" : "Got it"}</button><button type="button" data-act="${pre}missed" aria-pressed="false">${histDate ? "Still missed" : "Missed it"}</button></div>
+    </div>
+  </article>`;
+}
+function buildToday() {
+  const date = state.current, day = date && state.days.get(date);
+  const key = day ? date + ":" + JSON.stringify(day).length + ":" + (day.updatedAt || "") : "none";
+  if (key === state.builtKey) return;
+  state.builtKey = key;
+  const body = $("today-body");
+  if (!day) {
+    body.innerHTML = `<p class="empty">No set yet. The first set is written at 6:45 AM Central and appears here.</p>`;
+    $("today-eyebrow").textContent = "Today";
+    return;
+  }
+  const t = todayISO();
+  $("today-eyebrow").textContent = fmtDay(date, { weekday: "long", month: "long", day: "numeric" });
+  const banner = date !== t ? `<p class="banner">This is the set from ${esc(fmtDay(date))}. Today's set is written at 6:45 AM Central.</p>` : "";
+  const focus = (day.focus || []).length ? `<p class="focus">Focus today: <b>${day.focus.map(esc).join(", ")}</b>${day.note ? ". " + esc(day.note) : ""}</p>` : (day.note ? `<p class="focus">${esc(day.note)}</p>` : "");
+  let html = banner + focus;
+  for (const s of SECTIONS) {
+    const probs = probsIn(day, s);
+    const min = s.topics ? probs.reduce((a, p) => a + (+p.minutes || 3), 0) : s.min;
+    let inner = "";
+    if (s.kind === "zetamac") {
+      inner = `<div class="row">
+        <a class="btnlink" href="https://arithmetic.zetamac.com/" target="_blank" rel="noopener">Open Zetamac</a>
+        <div class="field narrow"><label for="z-score">Score</label><input type="number" id="z-score" inputmode="numeric" min="0" max="200" placeholder="e.g. 42"></div>
+      </div><p class="hint">Default settings: addition, subtraction, multiplication, division, 120 seconds.</p>`;
+    } else if (s.kind === "mental") {
+      const qs = (day.mental || []).map((m) => `<li><span>${esc(m.q)}</span><span class="a" hidden>${esc(m.a)}</span></li>`).join("");
+      inner = `<div class="row"><span class="clock" id="m-clock">0:00</span>
+          <button type="button" class="primary" id="m-start" data-act="mstart">Start the clock</button>
+          <button type="button" id="m-stop" data-act="mstop" hidden>Stop</button>
+          <button type="button" id="m-show" data-act="mshow" hidden>Show answers</button></div>
+        <p class="hint" id="m-hint">The 10 problems appear when you start the clock. Decimals to 2 places unless the problem says otherwise.</p>
+        <ol class="mm-grid" id="m-list" hidden>${qs}</ol>
+        <div class="row">
+          <div class="field narrow"><label for="m-correct">Right (of ${(day.mental || []).length || 10})</label><input type="number" id="m-correct" inputmode="numeric" min="0" max="${(day.mental || []).length || 10}"></div>
+          <div class="field narrow"><label for="m-secs">Time (seconds)</label><input type="number" id="m-secs" inputmode="numeric" min="0"></div>
+        </div>`;
+    } else if (s.kind === "markets") {
+      inner = `<div class="field"><label for="mk-headline">Headline</label><input type="text" id="mk-headline" placeholder="One current market headline"></div>
+        <div class="field"><label for="mk-idea">Trade idea (one line)</label><input type="text" id="mk-idea" placeholder="What you'd do and in what instrument"></div>
+        <div class="field"><label for="mk-wrong">What would prove you wrong</label><input type="text" id="mk-wrong" placeholder="The level, print or event that kills the idea"></div>
+        ${day.marketsHint ? `<p class="hint">${esc(day.marketsHint)}</p>` : ""}`;
+    } else if (s.kind === "story") {
+      const st = day.story || {};
+      inner = `<p class="prompt"><b>${esc(st.prompt || "Walk me through your resume.")}</b></p>
+        ${st.tips ? `<p class="hint">${esc(st.tips)}</p>` : ""}
+        <div class="row"><span class="clock" id="s-clock">1:00</span><button type="button" data-act="sstart" id="s-start">Start 60 seconds</button></div>`;
+    } else {
+      inner = probs.length ? probs.map((p) => probHTML(p)).join("") : `<p class="empty">No problem in this slot today. Tick it off.</p>`;
+    }
+    html += `<section class="item" id="sec-${s.key}" data-key="${s.key}">
+      <div class="item-head"><input type="checkbox" class="chk" id="chk-${s.key}" data-key="${s.key}">
+        <label for="chk-${s.key}"><span class="item-title">${esc(s.title)}</span><span class="item-sub">${esc(s.sub)}</span></label>
+        <span class="item-meta">~${min} min</span></div>
+      <div class="item-body">${inner}</div></section>`;
+  }
+  html += `<div class="redo-bar"><span id="redo-text" class="hint">Missed problems you queue go into tomorrow's set.</span><button type="button" class="primary" data-act="redo" id="redo-btn">Redo missed</button></div>`;
+  body.innerHTML = html;
+}
+function syncProb(el, mark, revealed, fuShown) {
+  el.querySelector(".ans").hidden = !revealed;
+  el.querySelector('[data-act="reveal"]').closest(".actions").hidden = !!revealed;
+  const fu = el.querySelector(".fu");
+  if (fu) { fu.hidden = !fuShown; el.querySelector('[data-act="fu"]').closest(".actions").hidden = !!fuShown; }
+  el.classList.toggle("got", mark === "got"); el.classList.toggle("missed", mark === "missed");
+  el.querySelectorAll(".mark button").forEach((b) => b.setAttribute("aria-pressed", String(!!mark && b.dataset.act.endsWith(mark))));
+}
+function setVal(id, v) { const el = $(id); if (el && document.activeElement !== el) el.value = v ?? ""; }
+function syncToday() {
+  const date = state.current, day = date && state.days.get(date);
+  if (!day) return;
+  const v = view(date), items = v.items || {};
+  for (const s of SECTIONS) {
+    const chk = $("chk-" + s.key); if (!chk) continue;
+    chk.checked = sectionDone(day, v, s);
+    $("sec-" + s.key).classList.toggle("done", chk.checked);
+  }
+  document.querySelectorAll("#today-body .prob").forEach((el) => {
+    const pid = el.dataset.pid;
+    syncProb(el, (v.marks || {})[pid], (v.revealed || {})[pid], (v.revealed || {})[pid + "_fu"]);
+  });
+  const z = items.zetamac || {}, m = items.mental || {}, mk = items.markets || {};
+  setVal("z-score", z.score); setVal("m-correct", m.correct); setVal("m-secs", m.seconds);
+  setVal("mk-headline", mk.headline); setVal("mk-idea", mk.idea); setVal("mk-wrong", mk.wrong);
+  syncMental();
+  const n = unresolvedMissed().length;
+  $("redo-text").textContent = n ? `${n} missed problem${n === 1 ? "" : "s"} not yet queued. Queue them and they go into tomorrow's set.` : (state.queue.length ? `${state.queue.length} queued for tomorrow's set.` : "No missed problems waiting. Anything you miss can be queued for tomorrow.");
+  $("redo-btn").disabled = !n;
+}
+
+/* mental-math clock (start time kept on this device so a reload keeps it running) */
+let mTick = 0;
+const mKey = () => "tprep.mstart." + state.current;
+function syncMental() {
+  const date = state.current; if (!$("m-list")) return;
+  const v = view(date), m = (v.items || {}).mental || {}, start = store.get(mKey());
+  const running = !!start, recorded = typeof m.seconds === "number";
+  const shown = (v.revealed || {}).mental;
+  $("m-list").hidden = !(running || recorded || shown);
+  $("m-start").hidden = running; $("m-start").textContent = recorded ? "Run it again" : "Start the clock";
+  $("m-stop").hidden = !running;
+  $("m-show").hidden = running || !(recorded || shown); $("m-show").textContent = shown ? "Hide answers" : "Show answers";
+  document.querySelectorAll("#m-list .a").forEach((a) => (a.hidden = !shown));
+  $("m-hint").hidden = running || recorded || shown;
+  clearInterval(mTick);
+  const show = (s) => ($("m-clock").textContent = Math.floor(s / 60) + ":" + String(Math.floor(s % 60)).padStart(2, "0"));
+  if (running) { const f = () => show((Date.now() - start) / 1000); f(); mTick = setInterval(f, 250); }
+  else show(recorded ? m.seconds : 0);
+}
+let sTick = 0;
+
+$("today-body").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const date = state.current, act = b.dataset.act, card = b.closest(".prob"), pid = card && card.dataset.pid;
+  const day = state.days.get(date);
+  if (act === "reveal") patch(date, { revealed: { [pid]: true } }, 150);
+  else if (act === "fu") patch(date, { revealed: { [pid + "_fu"]: true } }, 150);
+  else if (act === "got" || act === "missed") {
+    const v = view(date), sec = SECTIONS.find((s) => s.topics && s.topics.includes(day.problems.find((p) => p.id === pid).topic));
+    const marks = { ...(v.marks || {}), [pid]: act };
+    const p = { marks: { [pid]: act } };
+    if (sec && probsIn(day, sec).every((x) => marks[x.id])) p.items = { [sec.key]: { done: true } };
+    patch(date, p, 150);
+  } else if (act === "mstart") { store.set(mKey(), Date.now()); patch(date, { items: { mental: { seconds: null } }, revealed: { mental: false } }, 150); }
+  else if (act === "mstop") {
+    const start = store.get(mKey()); store.set(mKey(), null);
+    patch(date, { items: { mental: { seconds: Math.round((Date.now() - (start || Date.now())) / 1000) } } }, 150);
+  } else if (act === "mshow") patch(date, { revealed: { mental: !(view(date).revealed || {}).mental } }, 150);
+  else if (act === "sstart") {
+    clearInterval(sTick); const end = Date.now() + 60000;
+    const f = () => { const s = Math.max(0, Math.ceil((end - Date.now()) / 1000)); $("s-clock").textContent = "0:" + String(s).padStart(2, "0"); if (s === 0) { $("s-clock").textContent = "1:00"; clearInterval(sTick); b.textContent = "Again"; } };
+    f(); sTick = setInterval(f, 250); b.textContent = "Restart";
+  } else if (act === "redo") queueMissed(unresolvedMissed(), $("redo-text"));
+});
+$("today-body").addEventListener("change", (e) => {
+  const t = e.target, date = state.current;
+  if (t.classList.contains("chk")) patch(date, { items: { [t.dataset.key]: { done: t.checked } } }, 150);
+});
+$("today-body").addEventListener("input", (e) => {
+  const t = e.target, date = state.current, val = t.value;
+  const num = (x) => (x === "" ? null : Math.max(0, Math.round(+x)));
+  if (t.id === "z-score") { const s = num(val); patch(date, { items: { zetamac: s ? { score: s, done: true } : { score: s } } }, 700); }
+  else if (t.id === "m-correct" || t.id === "m-secs") {
+    const field = t.id === "m-correct" ? "correct" : "seconds";
+    const m = deepMerge((view(date).items || {}).mental || {}, { [field]: num(val) });
+    patch(date, { items: { mental: { [field]: num(val), ...(typeof m.correct === "number" && typeof m.seconds === "number" ? { done: true } : {}) } } }, 700);
+  } else if (t.id.startsWith("mk-")) {
+    const f = t.id.slice(3), mk = deepMerge((view(date).items || {}).markets || {}, { [f]: val });
+    patch(date, { items: { markets: { [f]: val, ...(mk.headline && mk.idea && mk.wrong ? { done: true } : {}) } } }, 800);
+  }
+});
+
+/* ---------- redo queue ---------- */
+async function queueMissed(list, msgEl) {
+  if (!state.db || !list.length) return;
+  let n = 0;
+  for (const m of list) {
+    try { await state.db.collection("queue").doc(m.root).set({ pid: m.root, date: m.date, topic: m.topic, prompt: String(m.prompt || "").slice(0, 160), queuedAt: new Date().toISOString() }); n++; }
+    catch (err) { break; }
+  }
+  if (msgEl) msgEl.textContent = n === list.length ? `Queued ${n} problem${n === 1 ? "" : "s"} for tomorrow's set.` : `Queued ${n} of ${list.length}. Try again for the rest.`;
+}
+$("queue").addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-unqueue]"); if (!b || !state.db) return;
+  b.disabled = true;
+  try { await state.db.collection("queue").doc(b.dataset.unqueue).delete(); } catch { b.disabled = false; }
+});
+
+/* ---------- progress ---------- */
+function renderTiles() {
+  const { cur, best } = streaks();
+  $("t-streak").textContent = cur; $("t-best").textContent = best;
+  const day = state.current && state.days.get(state.current);
+  $("t-today").textContent = day ? `${doneCount(day, view(state.current))}/10` : "–";
+  $("t-min").textContent = day ? estMinutes(day) : "–";
+  const m = state.meta;
+  const bits = [];
+  if (m && m.lastRunAt) bits.push(`<span>Last set written <b>${esc(fmtRun(m.lastRunAt))}</b></span>`);
+  bits.push(`<span>Next set <b>6:45 AM CT</b></span>`);
+  if (m && m.lastRunSummary) bits.push(`<span>${esc(m.lastRunSummary)}</span>`);
+  $("runline").innerHTML = bits.join("");
+}
+function zPoints() {
+  const pts = [];
+  for (const d of new Set([...state.results.keys(), ...Object.keys(writers)])) {
+    const s = ((view(d).items || {}).zetamac || {}).score;
+    if (typeof s === "number" && s > 0) pts.push({ date: d, score: s });
+  }
+  return pts.sort((a, b) => a.date.localeCompare(b.date));
+}
+let zPts = [];
+function renderZ() {
+  zPts = zPoints();
+  const el = $("zchart");
+  $("ztable").innerHTML = zPts.length ? `<table><thead><tr><th>Date</th><th>Score</th></tr></thead><tbody>${[...zPts].reverse().map((p) => `<tr><td>${esc(fmtDay(p.date))}</td><td class="mono">${p.score}</td></tr>`).join("")}</tbody></table>` : `<p class="empty">No scores yet.</p>`;
+  if (!zPts.length) { el.innerHTML = `<p class="empty">Your Zetamac scores will chart here once you log the first one.</p>`; return; }
+  const W = Math.max(300, el.clientWidth || 640), H = 200, m = { l: 34, r: 40, t: 18, b: 26 };
+  const xs = zPts.map((p) => dnum(p.date));
+  let x0 = Math.min(...xs), x1 = Math.max(...xs); if (x0 === x1) { x0 -= 1; x1 += 1; }
+  const vals = zPts.map((p) => p.score), mn = Math.min(...vals), mx = Math.max(...vals);
+  const step = mx - mn > 60 ? 20 : mx - mn > 25 ? 10 : 5;
+  const lo = Math.max(0, Math.floor((mn - step / 2) / step) * step), hi = Math.ceil((mx + step / 2) / step) * step;
+  const X = (d) => m.l + ((d - x0) / (x1 - x0)) * (W - m.l - m.r), Y = (v) => m.t + (1 - (v - lo) / (hi - lo)) * (H - m.t - m.b);
+  let g = "";
+  for (let v = lo; v <= hi; v += step) g += `<line class="grid" x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}"/><text class="ax" x="${m.l - 6}" y="${Y(v) + 3.5}" text-anchor="end">${v}</text>`;
+  const firstD = zPts[0].date, lastD = zPts[zPts.length - 1].date;
+  g += `<text class="ax" x="${X(dnum(firstD))}" y="${H - 6}" text-anchor="${zPts.length > 1 ? "start" : "middle"}">${esc(fmtDay(firstD, { month: "short", day: "numeric" }))}</text>`;
+  if (zPts.length > 1) g += `<text class="ax" x="${X(dnum(lastD))}" y="${H - 6}" text-anchor="end">${esc(fmtDay(lastD, { month: "short", day: "numeric" }))}</text>`;
+  const path = zPts.map((p, i) => (i ? "L" : "M") + X(dnum(p.date)).toFixed(1) + "," + Y(p.score).toFixed(1)).join("");
+  const area = zPts.length > 1 ? `<path class="ar" d="${path}L${X(dnum(lastD)).toFixed(1)},${Y(lo)}L${X(dnum(firstD)).toFixed(1)},${Y(lo)}Z"/>` : "";
+  const dots = zPts.map((p, i) => `<circle class="pt" cx="${X(dnum(p.date))}" cy="${Y(p.score)}" r="${i === zPts.length - 1 ? 5.5 : 4}"/>`).join("");
+  const last = zPts[zPts.length - 1];
+  const lab = `<text class="lab" x="${X(dnum(last.date)) + 9}" y="${Y(last.score) + 4}">${last.score}</text>`;
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Zetamac score by day, latest ${last.score}">${g}${area}<path class="ln" d="${path}"/>${dots}${lab}<line class="xh" id="zxh" y1="${m.t}" y2="${H - m.b}" visibility="hidden"/><rect x="${m.l}" y="0" width="${W - m.l - m.r}" height="${H}" fill="transparent" id="zhit"/></svg><div class="tip" id="ztip" hidden></div>`;
+  const hit = $("zhit"), tip = $("ztip"), xh = $("zxh");
+  hit.addEventListener("pointermove", (e) => {
+    const r = el.querySelector("svg").getBoundingClientRect(), sx = ((e.clientX - r.left) / r.width) * W;
+    let best = zPts[0]; for (const p of zPts) if (Math.abs(X(dnum(p.date)) - sx) < Math.abs(X(dnum(best.date)) - sx)) best = p;
+    const px = X(dnum(best.date));
+    xh.setAttribute("x1", px); xh.setAttribute("x2", px); xh.setAttribute("visibility", "visible");
+    tip.hidden = false; tip.textContent = `${fmtDay(best.date)} · ${best.score}`;
+    tip.style.left = (px / W) * r.width + "px"; tip.style.top = (Y(best.score) / H) * r.height + "px";
+  });
+  hit.addEventListener("pointerleave", () => { tip.hidden = true; xh.setAttribute("visibility", "hidden"); });
+}
+function renderAcc() {
+  const tally = accuracy14(), levels = (state.meta && state.meta.levels) || {};
+  const rows = TOPICS.filter((t) => tally[t]);
+  $("acc").innerHTML = rows.length ? rows.map((t) => {
+    const a = tally[t], pct = Math.round((100 * a.got) / a.total);
+    const lv = levels[t] && levels[t].level ? `<span class="lv">L${levels[t].level}</span>` : "";
+    return `<div class="bar"><span>${esc(t)}${lv}</span><div class="track" title="${a.got} of ${a.total}"><div class="fill" style="width:${pct}%"></div></div><span class="v">${a.got}/${a.total} · ${pct}%</span></div>`;
+  }).join("") : `<p class="empty">Mark problems Got it or Missed it and your accuracy shows here.</p>`;
+  const weak = rows.filter((t) => tally[t].total >= 2).map((t) => ({ t, p: tally[t].got / tally[t].total, a: tally[t] })).filter((x) => x.p < 1).sort((a, b) => a.p - b.p || b.a.total - a.a.total).slice(0, 3);
+  $("weak").innerHTML = weak.length ? weak.map((w) => `<li><span>${esc(w.t)}</span><span class="mono">${Math.round(w.p * 100)}% · ${w.a.got}/${w.a.total}</span></li>`).join("") : `<li class="empty">${rows.length ? "Nothing below 100% with at least 2 attempts yet." : "Needs a few marked problems first."}</li>`;
+  const q = [...state.queue].sort((a, b) => String(a.queuedAt).localeCompare(String(b.queuedAt)));
+  $("queue").innerHTML = q.length ? q.map((x) => `<li><span title="${esc(x.prompt)}"><b>${esc(x.topic)}</b> · ${esc(x.prompt)}</span><button type="button" data-unqueue="${esc(x.id)}">Remove</button></li>`).join("") : `<li class="empty">Nothing queued. Use "Redo missed" to add missed problems.</li>`;
+}
+
+/* ---------- history ---------- */
+function renderHistory() {
+  const days = [...state.days.values()].filter((d) => d.date !== state.current).sort((a, b) => b.date.localeCompare(a.date));
+  const el = $("days");
+  if (!days.length) { el.innerHTML = `<p class="empty">Past days appear here after your first day.</p>`; return; }
+  el.innerHTML = days.map((day) => {
+    const v = view(day.date), marks = v.marks || {}, retry = v.retry || {};
+    const probs = day.problems || [], marked = probs.filter((p) => marks[p.id]), got = marked.filter((p) => marks[p.id] === "got").length;
+    const z = ((v.items || {}).zetamac || {}).score, missed = probs.filter((p) => marks[p.id] === "missed" && retry[p.id] !== "got").length;
+    const body = state.openDays.has(day.date) ? `<div class="day-body">${probs.map((p) => probHTML(p, day.date)).join("")}
+      <div class="actions"><button type="button" data-hq="${esc(day.date)}" ${missed ? "" : "disabled"}>Queue this day's missed for tomorrow</button><span class="hint" data-hqmsg="${esc(day.date)}"></span></div></div>` : "";
+    return `<details class="day" data-date="${esc(day.date)}" ${state.openDays.has(day.date) ? "open" : ""}>
+      <summary><span class="day-date">${esc(fmtDay(day.date))}</span>
+        <span class="tag ${v.completed ? "got" : "plain"}">${v.completed ? "Complete" : doneCount(day, v) + "/10 done"}</span>
+        <span class="day-stats"><span>${got}/${marked.length} right</span>${missed ? `<span>${missed} to redo</span>` : ""}${z ? `<span>Zetamac ${z}</span>` : ""}</span></summary>${body}</details>`;
+  }).join("");
+  el.querySelectorAll(".prob").forEach((c) => {
+    const d = c.dataset.date, pid = c.dataset.pid, v = view(d), m = (v.marks || {})[pid], r = (v.retry || {})[pid];
+    const k = d + "/" + pid;
+    syncProb(c, r, state.histReveal.has(k), state.histReveal.has(k + "_fu"));
+    const chip = c.querySelector('[data-slot="mark"]');
+    chip.hidden = false; chip.className = "tag " + (m === "got" ? "got" : m === "missed" ? "missed" : "plain");
+    chip.textContent = m === "got" ? "Got it" : m === "missed" ? "Missed" : "Not marked";
+    c.classList.toggle("got", r === "got" || (!r && m === "got")); c.classList.toggle("missed", r === "missed" || (!r && m === "missed"));
+  });
+}
+$("days").addEventListener("toggle", (e) => {
+  const d = e.target.closest && e.target.closest("details.day"); if (!d) return;
+  const was = state.openDays.has(d.dataset.date);
+  if (d.open && !was) { state.openDays.add(d.dataset.date); renderHistory(); }
+  else if (!d.open && was) state.openDays.delete(d.dataset.date);
+}, true);
+$("days").addEventListener("click", (e) => {
+  const hq = e.target.closest("[data-hq]");
+  if (hq) {
+    const date = hq.dataset.hq, day = state.days.get(date), ids = new Set((day.problems || []).map((p) => p.redoOf || p.id));
+    queueMissed(unresolvedMissed().filter((m) => ids.has(m.root)), document.querySelector(`[data-hqmsg="${date}"]`));
+    return;
+  }
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const c = b.closest(".prob"), d = c.dataset.date, pid = c.dataset.pid, act = b.dataset.act;
+  if (act === "reveal") { state.histReveal.add(d + "/" + pid); renderHistory(); }
+  else if (act === "fu") { state.histReveal.add(d + "/" + pid + "_fu"); renderHistory(); }
+  else if (act === "hgot" || act === "hmissed") patch(d, { retry: { [pid]: act.slice(1) } }, 150);
+});
+
+/* ---------- wiring ---------- */
+let refreshQueued = false;
+function refresh() {
+  if (refreshQueued) return; refreshQueued = true;
+  requestAnimationFrame(() => {
+    refreshQueued = false;
+    state.current = pickCurrent();
+    buildToday(); syncToday(); renderTiles(); renderAcc(); renderHistory(); renderZ();
+  });
+}
+if (window.ResizeObserver) { let w0 = 0; new ResizeObserver((en) => { const w = Math.round(en[0].contentRect.width); if (w !== w0) { w0 = w; renderZ(); } }).observe($("zchart")); }
+setInterval(() => { if (pickCurrent() !== state.current) refresh(); }, 60000);
+if (anyPending()) setStatus("", "Unsaved entries from this device will sync when the page connects.");
+
+(async () => {
+  const db = window.claude && claude.use ? await claude.use("db") : null;
+  if (!db) {
+    $("runline").innerHTML = `<span>Open this page while signed in to Claude to load your sets.</span>`;
+    $("today-body").innerHTML = `<p class="empty">Your sets and results are stored with this page. Open it while signed in to Claude to see them.</p>`;
+    return;
+  }
+  state.db = db;
+  const fail = () => setStatus("err", "Lost the connection to your saved data. Reload the page to reconnect.");
+  db.collection("days").orderBy("date", "desc").limit(120).onSnapshot((s) => {
+    state.days = new Map(s.docs.map((d) => [d.id, { ...d.data(), date: d.data().date || d.id }])); state.daysLoaded = true; refresh();
+  }, fail);
+  db.collection("results").orderBy("date", "desc").limit(1000).onSnapshot((s) => {
+    state.results = new Map(s.docs.map((d) => [d.id, d.data()])); state.resultsLoaded = true;
+    Object.keys(writers).forEach(flush); refresh();
+  }, fail);
+  db.collection("queue").onSnapshot((s) => { state.queue = s.docs.map((d) => ({ id: d.id, ...d.data() })); refresh(); }, fail);
+  db.doc("meta/state").onSnapshot((s) => { state.meta = s.exists ? s.data() : null; refresh(); }, fail);
+})();
+</script>
