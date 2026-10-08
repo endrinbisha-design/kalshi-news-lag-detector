@@ -135,6 +135,26 @@ _SUB = (
 _TICKER_DATE = re.compile(r"-(\d{2}[A-Z]{3}\d{2})-")
 
 
+# Kalshi serves only ~two months of settled KXHIGHNY markets: on 2026-10-08 the 08-01
+# event returned no markets at all, so every statistic built on ladders and 17:00 asks
+# was silently becoming a rolling window that loses its oldest day each day. Persist
+# what has been fetched so history stops expiring. The cache only ever ADDS days; a
+# live fetch for a day still served by Kalshi overrides the cached copy.
+_LADDER_CACHE = ROOT / "track_record" / "kalshi_ladders.json"
+_ASK_CACHE = ROOT / "track_record" / "kalshi_ask_1700.json"
+
+
+def _load_json(path: Path) -> dict:
+    try:
+        return json.loads(path.read_text())
+    except FileNotFoundError:
+        return {}
+
+
+def _save_json(path: Path, obj: dict) -> None:
+    path.write_text(json.dumps(obj, indent=1, sort_keys=True) + "\n")
+
+
 def real_ladders() -> dict[dt.date, list[tuple[int, int]]]:
     """Per-day KXHIGHNY strike ladder, straight from the settled markets.
 
@@ -147,13 +167,35 @@ def real_ladders() -> dict[dt.date, list[tuple[int, int]]]:
     Never assume the ladder -- look it up.
     """
     out: dict[dt.date, list[tuple[int, int]]] = {}
-    try:
-        with urllib.request.urlopen(urllib.request.Request(
-                f"{_KALSHI}/markets?series_ticker=KXHIGHNY&status=settled&limit=1000",
-                headers=UA), timeout=60) as r:
-            markets = json.load(r).get("markets", [])
-    except Exception:
-        return out
+    # 2026-10-08: this used to fetch ONE page (limit=1000, newest first) and return {} on
+    # any error. The settled history passed 1000 markets that day, so the OLDEST logged
+    # day (08-01) silently fell off the end and the script printed "1 days skipped" as if
+    # the ladder were genuinely unavailable. Follow the cursor to the end, and raise on a
+    # persistent fetch failure instead of quietly returning an empty ladder.
+    markets: list[dict] = []
+    cursor = ""
+    for _ in range(100):                       # hard stop; ~6 markets/day, 1000/page
+        u = f"{_KALSHI}/markets?series_ticker=KXHIGHNY&status=settled&limit=1000"
+        if cursor:
+            u += f"&cursor={cursor}"
+        page = None
+        last = None
+        for delay in (0, 2, 4, 8, 16):
+            if delay:
+                time.sleep(delay)
+            try:
+                with urllib.request.urlopen(urllib.request.Request(u, headers=UA),
+                                            timeout=60) as r:
+                    page = json.load(r)
+                break
+            except Exception as exc:           # noqa: BLE001 - transport failure retries
+                last = exc
+        if page is None:
+            raise RuntimeError(f"Kalshi settled-markets fetch failed: {last}")
+        markets.extend(page.get("markets", []))
+        cursor = page.get("cursor") or ""
+        if not cursor or not page.get("markets"):
+            break
     for m in markets:
         td = _TICKER_DATE.search(m.get("ticker", ""))
         if not td:
@@ -165,7 +207,12 @@ def real_ladders() -> dict[dt.date, list[tuple[int, int]]]:
                 day = dt.datetime.strptime(td.group(1), "%y%b%d").date()
                 out.setdefault(day, []).append(fn(mm))
                 break
-    return out
+    cached = {dt.date.fromisoformat(k): [tuple(b) for b in v]
+              for k, v in _load_json(_LADDER_CACHE).items()}
+    merged = {**cached, **{d: sorted(set(v)) for d, v in out.items()}}
+    _save_json(_LADDER_CACHE, {d.isoformat(): [list(b) for b in v]
+                               for d, v in sorted(merged.items())})
+    return merged
 
 
 def bucket_on(ladders, day: dt.date, t: int):
@@ -191,7 +238,7 @@ def _candle_cents(node, field: str = "close"):
     return float(v) * 100.0 if v is not None else None
 
 
-def ask_1700(day: dt.date, lo: int, hi: int):
+def _ask_1700_live(day: dt.date, lo: int, hi: int):
     """Yes-ask in cents for that day's ``lo``-``hi`` bucket on the 17:00 EDT candle.
 
     The price of the near-certainty was previously a hand-maintained block of numbers in
@@ -238,6 +285,19 @@ def ask_1700(day: dt.date, lo: int, hi: int):
                     return a
         time.sleep(0.3)                        # stay under the candle endpoint's rate limit
     return None
+
+
+def ask_1700(day: dt.date, lo: int, hi: int):
+    """Cached wrapper: Kalshi drops candles after ~two months, so keep what was seen."""
+    cache = _load_json(_ASK_CACHE)
+    key = f"{day.isoformat()}|{lo}|{hi}"
+    if key in cache:
+        return cache[key]
+    a = _ask_1700_live(day, lo, hi)
+    if a is not None:
+        cache[key] = a
+        _save_json(_ASK_CACHE, cache)
+    return a
 
 
 def main() -> int:
