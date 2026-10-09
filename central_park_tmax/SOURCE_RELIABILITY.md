@@ -13,26 +13,26 @@ quantisation section — are deliberately frozen at what was known when the call
 and should not be refreshed. Everything else tracks the latest run.
 
 This document exists because on 09-11 I claimed the preliminary CLI had beaten the
-six-hour group and that "the ordering is reversed." **Tested across all 68 days, that is
+six-hour group and that "the ordering is reversed." **Tested across all 69 days, that is
 wrong.** The groups are settlement-grade and the preliminary is not.
 
 ## The scoreboard
 
 | source | available | matches settlement |
 |---|---|---|
-| morning group (8 AM–2 PM) | 1:51 PM | 28/68 — **41 %** |
-| preliminary CLI | ~4:31–5:14 PM ‡ | 35/45 — **78 %** |
-| afternoon group (2 PM–8 PM) | 7:51 PM | 57/68 — **84 %** † |
-| **max of ALL same-day groups** | **7:51 PM** | **67/68 — 99 %** |
+| morning group (8 AM–2 PM) | 1:51 PM | 28/69 — **41 %** |
+| preliminary CLI | ~4:31–5:14 PM ‡ | 36/46 — **78 %** |
+| afternoon group (2 PM–8 PM) | 7:51 PM | 58/69 — **84 %** † |
+| **max of ALL same-day groups** | **7:51 PM** | **68/69 — 99 %** |
 
 ‡ **Not always.** On 2026-09-28 the preliminary was issued at **9:41 PM**, absent from
 both api.weather.gov and IEM AFOS through 5:47 PM — a real absence, not a feed miss. It
 still carried "VALID TODAY AS OF 0400 PM" and still counts as a preliminary. Anything that
-assumes the preliminary is in hand by ~5:15 PM now has one counterexample in 45; 09-29's was back at 4:43 PM.
+assumes the preliminary is in hand by ~5:15 PM now has one counterexample in 46; 09-29's was back at 4:43 PM.
 
 † **That 84 % is partly a free ride — see "The afternoon group is not always an
 independent measurement" below.** On the 18 days where it repeats the morning group it
-scores 18/18; on the other 50 it scores 39/50 = 78 %. **The partition behind those two
+scores 18/18; on the other 51 it scores 40/51 = 78 %. **The partition behind those two
 numbers is itself known to be wrong in at least one case, so treat 78 % as indicative
 rather than measured.**
 
@@ -40,7 +40,7 @@ rather than measured.**
 It originally read "max of both groups" and was computed from the morning and afternoon
 groups only. 2026-09-14 broke it: an overnight-max day settling at 75, where morning
 (73.04) and afternoon (73.94) both round to 74, while the **2 AM–8 AM group reads 75.02**
-and was never consulted. Across the 68 days, daytime-only would miss **two** — 08-27 and
+and was never consulted. Across the 69 days, daytime-only would miss **two** — 08-27 and
 09-14 — where all-same-day-groups misses one. The 98 % was under-specified, not wrong; two
 of three available groups were going in, and no earlier day in the run stressed it.
 
@@ -54,7 +54,7 @@ hour.
   does not hold.
 * The one failure of max-of-all-same-day-groups is **2026-08-27**, the sensor-contamination day
   where a 9-minute spike during heavy rain entered the group and the CLI's QC rejected it
-  (group 81, settled 77). That remains the only day in 68 where a group was wrong and the
+  (group 81, settled 77). That remains the only day in 69 where a group was wrong and the
   CLI right — so it is one exception, not a pattern, but it is the reason the 98 % is not
   100 %.
 
@@ -67,13 +67,13 @@ Day twenty-eight was a +2.
 
 | settled − preliminary | days | share |
 |---|---|---|
-| **+0 °F** | 35 | **78 %** |
+| **+0 °F** | 36 | **78 %** |
 | **+1 °F** | 9 | **20 %** |
 | **+2 °F** | **1** | **2 %** |
 | negative | **0** | **0 %** |
 
 The nine misses are 08-03, 08-17, 08-25, 08-30, 09-01, 09-03, 09-06, 09-13 (all +1) and
-**09-20 (+2)**. The never-negative direction still holds at 45/45 — **but see the minimum
+**09-20 (+2)**. The never-negative direction still holds at 46/46 — **but see the minimum
 section below, which shows what that record does and does not protect against.**
 
 **The +2 is a different mechanism, not a bigger version of the +1.** On 09-20 the
@@ -85,7 +85,7 @@ preliminary measuring a different part of the day altogether. **Rain-clearing ev
 warm advection are their own mode, and autumn produces more of them, not fewer.**
 
 The split has read 63/37, 65/35, 62/38, 64/36, 65/35, 67/33, 68/32, 69/31, 70/30, 68/29/4
-then **69/28/3** across eleven successive days, and has since drifted to **78/20/2** (45 preliminaries, through 10-07). Quote it from the script, never from memory — and
+then **69/28/3** across eleven successive days, and has since drifted to **78/20/2** (46 preliminaries, through 10-08). Quote it from the script, never from memory — and
 note that the thing which had "held across all nine" was exactly the thing that broke.
 
 **Read this as a lesson about the shape of the claim, not just the numbers.** A
@@ -101,8 +101,8 @@ integers above it**, known at ~4:40 PM:
 ```
 P(settle = preliminary)     ≈ 0.78
 P(settle = preliminary + 1) ≈ 0.20
-P(settle = preliminary + 2) ≈ 0.02     <- 1 day in 45, added 09-20
-P(settle < preliminary)     ≈ 0        (0/45, but see the caveat below)
+P(settle = preliminary + 2) ≈ 0.02     <- 1 day in 46, added 09-20
+P(settle < preliminary)     ≈ 0        (0/46, but see the caveat below)
 ```
 
 The never-below half rests on a mechanism — the preliminary can only be *beaten* by what
@@ -144,13 +144,13 @@ Against real ladders:
 
 | | days | result |
 |---|---|---|
-| both integers in one bucket | 30/45 (67 %) | bucket correct **30/30** |
+| both integers in one bucket | 30/46 (65 %) | bucket correct **30/30** |
 | …of which the open-ended bucket | **9** | certainty is nearly free |
 | …**genuine 2-wide bucket** | **21** | **21/21 correct** |
-| integers straddle a boundary | 15/45 (33 %) | majority side won **13/15** |
+| integers straddle a boundary | 16/46 (35 %) | majority side won **14/16** |
 
-So the split flags a genuine narrow-bucket on **21 days in 45 — not 4 — and was right on
-all twenty-one.** The straddle days went 13/15 to the majority side, not 2/4.
+So the split flags a genuine narrow-bucket on **21 days in 46 — not 4 — and was right on
+all twenty-one.** The straddle days went 14/16 to the majority side, not 2/4.
 
 **But "near-certainty" was the wrong word, and 09-20's +2 shows why it was structurally
 wrong rather than just optimistic.** A 2-wide bucket `[lo, lo+1]` can only contain both
@@ -233,7 +233,7 @@ It is not a one-off. Across the 49 days:
 
 | | days |
 |---|---|
-| afternoon group **exactly equals** the morning group | **18/68** — upper bound |
+| afternoon group **exactly equals** the morning group | **18/69** — upper bound |
 | …and also exceeds every snapshot inside its own window | **13** |
 
 Twelve exact ties, each landing precisely on the morning maximum, looked far more
@@ -278,7 +278,7 @@ This possibility was written down on 09-18 *before* the evening data arrived, wh
 only reason it was tested rather than quietly absorbed into the duplicate count.
 
 **The discriminator is downgraded to suggestive, because the CLI peak time is not just
-imprecise — it can be flatly wrong.** Three strikes by 10-02:
+imprecise — it can be flatly wrong.** Four strikes by 10-08:
 
 * **09-19**: the time moved from 2:11 PM to 3:24 PM between the preliminary and the final —
   73 minutes — while the value stayed 69.
@@ -290,6 +290,8 @@ imprecise — it can be flatly wrong.** Three strikes by 10-02:
 * **10-02**: the preliminary timed the 83 at **1:49 PM**, inside the 8 AM–2 PM window whose
   group read 81 (27.2 °C) — impossible. The final moved it to **4:14 PM**, which the
   2–8 PM group (83) supports. Value right, time wrong by nearly two and a half hours.
+* **10-08**: *both* products time the 73 at **2:51 PM**, when the 2:51 PM hourly ob read
+  71 (21.7 °C). The only 73 on file is the 3:51 PM ob. Impossible on their own evidence.
 
 **A field that can be wrong by over an hour cannot decide which side of a 2 PM boundary a
 peak fell on**, which is exactly what the carried-forward-versus-double-top test asks of it.
@@ -627,6 +629,21 @@ sampling error on a tail share is ±10-15 points, so a 7-point gap like 10-07's 
 the pool's own noise. **Revised rule: on tail buckets, take the market's number unless the
 pool disagrees by more than its own standard error; only that counts as a divergence.**
 Under that rule 10-07 would have been recorded as agreement.
+
+**10-08: lost again — the largest gap yet, and the decisive one.** A +2 °F jump into the
+3:51 PM ob (71 → 73) under 18-20 kt gusts, after a trace flat at 71-72 since noon. The
+"rising at 3:51" pool said a +0 finish was only ~13-25 % likely and put 74-75 at ~72 %; the
+16:00 candle, which had the jump, still held 72-73 at ~80 %. Settled 73: the 3:51 read was
+the afternoon peak, a gust-mixed spike. The pool defines "rising" as 15:51 > 14:51 and
+cannot tell a spike from a trend; the market evidently could.
+
+**Record: 2 wins, 5 losses**, with the market right from both sides at every gap size from 7
+to 60 points. **Change of practice from 10-09:** the bucket probabilities in each advance
+call are the market's own (16:00 candle mid) unless there is a specific piece of evidence
+the market demonstrably has not priced — a SPECI or six-hour group that has not yet
+reached the board. Pool-based disagreements are still recorded, for the record, but are no
+longer scored as calls. The pools keep their real job: point estimates and the shape of the
+outcome distribution, where they have been exact on most quiet days.
 
 ## A second zero-mass claim fell, for the same reason as the first — 2026-09-27
 
