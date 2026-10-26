@@ -16,6 +16,24 @@ This document exists because on 09-11 I claimed the preliminary CLI had beaten t
 six-hour group and that "the ordering is reversed." **Tested across all 86 days, that is
 wrong.** The groups are settlement-grade and the preliminary is not.
 
+## Clock labels after DST ends (2026-11-01)
+
+Every time label in this document and in `scripts/source_reliability.py` is **EDT-equivalent
+(UTC−4) by construction**, and stays that way after the switch to EST. That is deliberate:
+
+* The six-hour groups are fixed in UTC (ending 06, 12, 18, 00 Z). Their keys `"02"`, `"08"`,
+  `"14"` and the snapshot key `"15:51"` (= 19:51 Z) are UTC-fixed; relabelling them in EST
+  would shift every key by an hour and break every pool built since 08-01.
+* The CLI day is LST, which is UTC−5 all year. `date(UTC−4 − 1 h)` *is* `date(UTC−5)`, so
+  the LST-day assignment is already correct in both seasons.
+
+What does change in November: the "15:51" read is **2:51 PM EST** on the wall clock, the
+pools' 3:51 PM advance call therefore happens at the 2:51 PM EST ob, and the preliminary's
+"as of 4 PM" cutoff moves from 20 Z to **21 Z**, one hour later relative to the groups. A
+post-cutoff maximum (the source of every +2 preliminary miss) needs an hour longer to slip
+past it, so the preliminary's error distribution may tighten in winter; treat Nov+ as a new
+sample before pooling it.
+
 ## The scoreboard
 
 | source | available | matches settlement |
