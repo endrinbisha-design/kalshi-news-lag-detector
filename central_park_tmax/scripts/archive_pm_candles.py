@@ -27,6 +27,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from source_reliability import _SUB, _candle_cents  # noqa: E402
 
+INCOMPLETE = object()
 UA = {"User-Agent": "central_park_tmax/0.1 (research)"}
 B = "https://api.elections.kalshi.com/trade-api/v2"
 OUT = ROOT / "track_record" / "kalshi_candles_pm.json"
@@ -84,6 +85,8 @@ def fetch_day(day: dt.date):
                 px[str(h)] = [_candle_cents(c.get("yes_bid"), "close"),
                               _candle_cents(c.get("yes_ask"), "close")]
         out.append({"lo": bk[0], "hi": bk[1], "px": px})
+    if not any("21" in b["px"] for b in out):
+        return INCOMPLETE                         # day still trading: do not freeze a hole
     return sorted(out, key=lambda r: r["lo"])
 
 
@@ -101,12 +104,18 @@ def main(argv):
         for pause in (0, 60, 180, 300):
             time.sleep(pause)
             try:
-                cache[key] = fetch_day(d)
+                got = fetch_day(d)
+                if got is not INCOMPLETE:
+                    cache[key] = got
+                else:
+                    print(key, "not finished trading; not stored", flush=True)
                 break
             except RuntimeError as exc:           # sustained 429s: wait it out, keep progress
                 print(key, "retrying after", exc, flush=True)
         else:
             print(key, "skipped for now; re-run to resume", flush=True)
+            continue
+        if key not in cache:
             continue
         OUT.write_text(json.dumps(cache, indent=1, sort_keys=True) + "\n")
         print(key, "n/a" if cache[key] is None else f"{len(cache[key])} buckets", flush=True)
