@@ -9,7 +9,8 @@ Strategies (fixed BEFORE looking at any result; thresholds were not tuned on thi
   FAV      buy YES on the bucket with the highest 16:00 ask               (market baseline)
   POOL_YES buy YES wherever pool_p - ask >= THETA                          (pool says cheap)
   POOL_NO  buy NO  wherever (1 - pool_p) - no_ask >= THETA                 (pool says rich)
-  PRELIM   buy YES on the bucket holding the preliminary high, 17:00 ask   (the "lock")
+  PRELIM   buy YES on the bucket holding the preliminary high, 17:00 ask   (the "lock"),
+           also reported split into genuine 2-wide and open-ended buckets
   DEAD_NO  buy NO on buckets that end below the banked max, 16:00          (arithmetic check)
 
 ``pool_p`` is an EXPANDING-window pool: for day d it uses only days strictly before d, the
@@ -177,6 +178,8 @@ def main():
                 q = b["px"].get(H_LOCK)
                 if b["lo"] <= r["prelim"] <= b["hi"] and q and q[1] is not None:
                     add("PRELIM", r, b, "yes", q[1], hit(b))
+                    add("PRELIM_2W" if b["hi"] - b["lo"] == 1 else "PRELIM_OPEN",
+                        r, b, "yes", q[1], hit(b))
 
     res = {name: summarize(bs, days_all) for name, bs in bets.items()}
     # threshold sensitivity for the pool rules (reported, NOT used for the headline)
@@ -208,7 +211,7 @@ def main():
                            "logloss_pool": ll_pool / max(nb, 1), "logloss_market": ll_mkt / max(nb, 1)}}
     OUT.write_text(json.dumps(out, indent=1) + "\n")
     print(f"priced days: {len(priced)}  ({out['first']} .. {out['last']})")
-    for name in ("FAV", "POOL_YES", "POOL_NO", "PRELIM", "DEAD_NO"):
+    for name in ("FAV", "POOL_YES", "POOL_NO", "PRELIM", "PRELIM_2W", "PRELIM_OPEN", "DEAD_NO"):
         print(f"{name:9s}", json.dumps(res.get(name, {"n": 0})))
     print("calibration", json.dumps(out["calibration"]))
     print("sensitivity")
