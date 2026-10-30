@@ -22,7 +22,7 @@ Honest limits, repeated in the report: ~60 priced days, one season, prices are c
 closes (no depth), SPECI reports are not in the IEM feed used for the banked max, and the
 strategies' bets within a day are correlated, so intervals resample DAYS, not bets.
 
-Usage (from central_park_tmax/):  python3 scripts/call_strategy_backtest.py
+Usage (from central_park_tmax/):  python3 scripts/call_strategy_backtest.py [--window DAYS]
 """
 from __future__ import annotations
 
@@ -43,7 +43,10 @@ THETA = 0.10
 MIN_SHAPE = 8
 SMOOTH = 0.5          # pseudo-count on remaining-rise 0..3
 H_ENTRY, H_LOCK = "20", "21"          # candle END hour UTC: 16:00 and 17:00 EDT
-OUT = ROOT / "backtest_datasets" / "call_strategy_backtest.json"
+WINDOW = int(sys.argv[sys.argv.index("--window") + 1]) if "--window" in sys.argv else 0
+# --window N: pool only the last N calendar days (0 = expanding window, the headline run).
+OUT = ROOT / "backtest_datasets" / (f"call_strategy_backtest_w{WINDOW}.json" if WINDOW
+                                    else "call_strategy_backtest.json")
 
 
 def fee(contracts: float, p: float) -> float:
@@ -125,7 +128,8 @@ def main():
         buckets = cache.get(ds)
         row = {"day": ds, **f, "H": H, "rise": H - f["banked"], "prelim": log[ds].get("prelim_high_f")}
         if buckets:
-            pmf, npool = pool_pmf(history, f["shape"])
+            hist = [h for h in history if not WINDOW or (d - dt.date.fromisoformat(h["day"])).days <= WINDOW]
+            pmf, npool = pool_pmf(hist, f["shape"])
             row.update(npool=npool, pmf=pmf, buckets=buckets)
             rows.append(row)
         history.append(row)
