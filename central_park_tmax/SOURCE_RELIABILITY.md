@@ -13,7 +13,7 @@ quantisation section — are deliberately frozen at what was known when the call
 and should not be refreshed. Everything else tracks the latest run.
 
 This document exists because on 09-11 I claimed the preliminary CLI had beaten the
-six-hour group and that "the ordering is reversed." **Tested across all 91 days, that is
+six-hour group and that "the ordering is reversed." **Tested across all 92 days, that is
 wrong.** The groups are settlement-grade and the preliminary is not.
 
 ## Clock labels after DST ends (2026-11-01)
@@ -38,10 +38,10 @@ sample before pooling it.
 
 | source | available | matches settlement |
 |---|---|---|
-| morning group (8 AM–2 PM) | 1:51 PM | 31/91 — **34 %** |
-| preliminary CLI | ~4:31–5:14 PM ‡ | 56/68 — **82 %** |
-| afternoon group (2 PM–8 PM) | 7:51 PM | 75/91 — **82 %** † |
-| **max of ALL same-day groups** | **7:51 PM** | **87/91 — 96 %** |
+| morning group (8 AM–2 PM) | 1:51 PM | 31/92 — **34 %** |
+| preliminary CLI | ~4:31–5:14 PM ‡ | 57/69 — **83 %** |
+| afternoon group (2 PM–8 PM) | 7:51 PM | 76/92 — **83 %** † |
+| **max of ALL same-day groups** | **7:51 PM** | **88/92 — 96 %** |
 
 ‡ **Not always.** On 2026-09-28 the preliminary was issued at **9:41 PM**, absent from
 both api.weather.gov and IEM AFOS through 5:47 PM — a real absence, not a feed miss. It
@@ -50,7 +50,7 @@ assumes the preliminary is in hand by ~5:15 PM now has one counterexample in 46;
 
 † **That 84 % is partly a free ride — see "The afternoon group is not always an
 independent measurement" below.** On the 21 days where it repeats the morning group it
-scores 19/21; on the other 70 it scores 56/70 = 80 %. **The partition behind those two
+scores 19/21; on the other 71 it scores 57/71 = 80 %. **The partition behind those two
 numbers is itself known to be wrong in at least one case, so treat 78 % as indicative
 rather than measured.**
 
@@ -58,7 +58,7 @@ rather than measured.**
 It originally read "max of both groups" and was computed from the morning and afternoon
 groups only. 2026-09-14 broke it: an overnight-max day settling at 75, where morning
 (73.04) and afternoon (73.94) both round to 74, while the **2 AM–8 AM group reads 75.02**
-and was never consulted. Across the 91 days, daytime-only would miss **five** — 08-27, 09-14, 10-13, 10-17 and
+and was never consulted. Across the 92 days, daytime-only would miss **five** — 08-27, 09-14, 10-13, 10-17 and
 10-27 — where all-same-day-groups misses four. 10-13's maximum is in the 20-02 group, which spans
 midnight local and is excluded by construction (see the 10-13 section). 10-17's is in **no group at all**:
 it was set at 12:08 AM LST, in the minutes before the 02-08 window opens (see the 10-17 section). 10-27's is the same family: 61 at 12:27 AM LST, in no group (see the 10-27 section). The 98 % was under-specified, not wrong; two
@@ -87,13 +87,13 @@ Day twenty-eight was a +2.
 
 | settled − preliminary | days | share |
 |---|---|---|
-| **+0 °F** | 56 | **82 %** |
+| **+0 °F** | 57 | **83 %** |
 | **+1 °F** | 9 | **13 %** |
 | **+2 °F** | **3** | **4 %** |
 | negative | **0** | **0 %** |
 
 The nine misses are 08-03, 08-17, 08-25, 08-30, 09-01, 09-03, 09-06, 09-13 (all +1),
-**09-20 (+2)**, **10-13 (+2)** and **10-16 (+2)**. All three +2s are maxima set after the preliminary's 4 PM cutoff (7:23 PM, 9:50 PM, 5:57 PM). The never-negative direction still holds at 68/68 — **but see the minimum
+**09-20 (+2)**, **10-13 (+2)** and **10-16 (+2)**. All three +2s are maxima set after the preliminary's 4 PM cutoff (7:23 PM, 9:50 PM, 5:57 PM). The never-negative direction still holds at 69/69 — **but see the minimum
 section below, which shows what that record does and does not protect against.**
 
 **The +2 is a different mechanism, not a bigger version of the +1.** On 09-20 the
@@ -121,8 +121,8 @@ integers above it**, known at ~4:40 PM:
 ```
 P(settle = preliminary)     ≈ 0.80
 P(settle = preliminary + 1) ≈ 0.15
-P(settle = preliminary + 2) ≈ 0.05     <- 3 days in 68 (09-20, 10-13, 10-16), all post-cutoff maxima
-P(settle < preliminary)     ≈ 0        (0/68, but see the caveat below)
+P(settle = preliminary + 2) ≈ 0.05     <- 3 days in 69 (09-20, 10-13, 10-16), all post-cutoff maxima
+P(settle < preliminary)     ≈ 0        (0/69, but see the caveat below)
 ```
 
 The never-below half rests on a mechanism — the preliminary can only be *beaten* by what
@@ -164,13 +164,13 @@ Against real ladders:
 
 | | days | result |
 |---|---|---|
-| both integers in one bucket | 40/68 (59 %) | bucket correct **39/40** — first miss 10-13 |
+| both integers in one bucket | 40/69 (58 %) | bucket correct **39/40** — first miss 10-13 |
 | …of which the open-ended bucket | **12** | certainty is nearly free |
 | …**genuine 2-wide bucket** | **28** | **28/28 correct** |
-| integers straddle a boundary | 28/68 (41 %) | majority side won **26/28** |
+| integers straddle a boundary | 29/69 (42 %) | majority side won **27/29** |
 
-So the split flags a genuine narrow-bucket on **28 days in 68 — not 4 — and was right on
-all twenty-eight.** The straddle days went 26/28 to the majority side, not 2/4.
+So the split flags a genuine narrow-bucket on **28 days in 69 — not 4 — and was right on
+all twenty-eight.** The straddle days went 27/29 to the majority side, not 2/4.
 
 **But "near-certainty" was the wrong word, and 09-20's +2 shows why it was structurally
 wrong rather than just optimistic.** A 2-wide bucket `[lo, lo+1]` can only contain both
@@ -256,7 +256,7 @@ It is not a one-off. Across the 49 days:
 
 | | days |
 |---|---|
-| afternoon group **exactly equals** the morning group | **21/91** — upper bound |
+| afternoon group **exactly equals** the morning group | **21/92** — upper bound |
 | …and also exceeds every snapshot inside its own window | **14** |
 
 Twelve exact ties, each landing precisely on the morning maximum, looked far more
@@ -286,7 +286,7 @@ Consequences, stated plainly:
 * The repair works **forward only**. `actual_high_time_lst` exists from 09-16; the NWS CLI
   archive retains about a week, so August and early September can never be classified. The
   script now reports the three-way split (carried / genuine / unknown) rather than a single
-  count, and it currently reads **2 / 1 / 10** (10-01 added a carried-forward case whose CLI peak time, 1:03 PM, agrees with the obs).
+  count, and it currently reads **2 / 2 / 10** after the 2026-11-01 LST correction below (10-01 added a carried-forward case whose CLI peak time, 1:03 PM, agrees with the obs).
 
 **Corrected 2026-09-27.** That three-way split was originally computed over *all* days where
 the afternoon group equals the morning group. It should only cover the days that show the
@@ -300,7 +300,40 @@ recorded peak time, because `actual_high_time_lst` begins on 09-16.
 This possibility was written down on 09-18 *before* the evening data arrived, which is the
 only reason it was tested rather than quietly absorbed into the duplicate count.
 
-**The discriminator is downgraded to suggestive, because the CLI peak time is not just
+### Correction, 2026-11-01: the "wrong peak times" were my unit error — CLI times are LST
+
+**The CLI reports peak times in local *standard* time (UTC−5 all year). Every snapshot and
+six-hour-window label in this project is UTC−4, so a CLI time must be moved forward one hour
+before it is compared with them.** The comparisons in the "strikes" below did not do that: a
+CLI "2:51 PM" was set against the 2:51 PM ob, when it is the 3:51 PM ob (the :51 METAR in
+LST is the :51 METAR an hour later in the labels). The test that settles it, run on every
+logged day with a recorded peak time and a testable window (`actual_high_time_lst` + 1 h
+falls in the 02-08, 08-14 or 14-20 window, and that window's group rounds to the settled
+high):
+
+| assumption | testable days | consistent |
+|---|---|---|
+| CLI time used as-is (what the strikes did) | 43 | 40 (93 %) — misses 09-21, 10-10, 10-23 |
+| CLI time + 1 h (LST → label) | 42 | **42 (100 %)** |
+
+So: 09-21 (both products "1:00 PM") is 2:00 PM in labels, the start of the afternoon window
+whose group read 72; 10-08 (both "2:51 PM") is the **3:51 PM ob, which read 73**; 10-10 ("1:58
+PM") is 2:58 PM, inside the window whose group read 69; 10-02's preliminary "1:49 PM" is
+2:49 PM and its final "4:14 PM" is 5:14 PM, both inside the 83 group's window. None was
+impossible. **What survives:** on eleven days the preliminary and final give *different*
+times for an unchanged value (09-19, 10-02, 10-09, 10-18 to 10-21, 10-24, 10-25, 10-29,
+10-31); with the plateaus that mark these days (the same value at several consecutive obs) the
+likely explanation is that the two products choose different readings among ties, not that
+either is wrong. The carried-forward / genuine-double-top classifier in
+`scripts/source_reliability.py` now applies the +1 h and reads **2 carried / 2 genuine / 10
+unknown**. The sweeping claim two paragraphs down, that "every field in the CLI except the max
+and min values has proved unreliable", is withdrawn for the peak time (issuance time and the
+preliminary's occasional +2 miss stand).
+
+The original text follows, kept for the record. Read its "impossible" verdicts through this
+correction.
+
+**[RETRACTED] The discriminator is downgraded to suggestive, because the CLI peak time is not just
 imprecise — it can be flatly wrong.** Five strikes by 10-10:
 
 * **09-19**: the time moved from 2:11 PM to 3:24 PM between the preliminary and the final —
@@ -830,6 +863,14 @@ and 0.036 for the market; see `CALL_STRATEGY_BACKTEST.md`). No change to the dai
 rule "morning group ≥ 3 °F above the 15:51 read on a falling afternoon → settles at the
 banked value" is now **13 of 13** on valid days (two July rows with bad data excluded). On
 such days the call is mechanical from the 1:51 PM group; the real work is afternoon-peak days.
+
+**10-31: the third +0 in four afternoon-peak days on this shape.** Above & flat, banked 58;
+pool 59-60 ~65 %, market (16:00 candle) 59-60 ~55.5 %, settled **58 (+0)**. Afternoon-peak
+days since 10-24 (excluding 10-27 first-hour and 10-30 morning-peak): +0, +1, +1, +0, +0, +0
+— four of six at +0 against a pool that expects ~30 %. Above & flat is n=9 {+0 ×4, +1 ×5}.
+The 15:00 candle was again stale (priced before the 15:51 print); only the 16:00 candle is a
+valid comparison. The final's peak time (4:51 PM LST) is the 17:51-label ob — the unit point
+in the 2026-11-01 correction above.
 
 
 ## A second zero-mass claim fell, for the same reason as the first — 2026-09-27

@@ -368,8 +368,9 @@ def main() -> int:
     # BUT EXACT EQUALITY IS NOT SUFFICIENT, and 09-18 proved it inside 24 hours: a
     # DOUBLE-TOPPED day produces the same two symptoms honestly. The discriminator is the
     # CLI's peak TIME:
-    #     peak time OUTSIDE 14:00-20:00  -> carried forward   (09-17, peak 12:55 PM)
-    #     peak time INSIDE  14:00-20:00  -> genuine reading   (09-18, peak 2:16 PM)
+    #     peak time OUTSIDE 14:00-20:00  -> carried forward   (09-17, peak 12:55 PM LST)
+    #     peak time INSIDE  14:00-20:00  -> genuine reading   (09-18, peak 2:16 PM LST)
+    # (times in the window labels, i.e. the CLI's LST time plus one hour)
     # so the count is split three ways below and the bare equality count is reported only as
     # an UPPER BOUND. Peak times come from actual_high_time_lst, which exists from 09-16
     # onward; the CLI archive retains about a week, so August can never be classified.
@@ -398,7 +399,11 @@ def main() -> int:
                 pk = log[ds].get("actual_high_time_lst")
                 if pk is None:
                     unknown += 1
-                elif 1400 <= int(pk) < 2000:
+                # CLI times are LOCAL STANDARD time (UTC-5 all year); the 6-hour windows and
+                # snapshot labels here are UTC-4. Add one hour before comparing, or every
+                # peak shifts a window early. (Found 2026-11-01: without the shift three days
+                # looked "impossible"; with it 42 of 42 testable days are consistent.)
+                elif 1400 <= int(pk) + 100 < 2000:
                     genuine += 1      # double-topped day: the equality is honest
                 else:
                     carried += 1
