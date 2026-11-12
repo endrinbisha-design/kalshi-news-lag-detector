@@ -76,7 +76,12 @@ nav.jump a { font-size: 0.85rem; font-weight: 600; text-decoration: none; border
 .status { font-size: 0.82rem; color: var(--muted); min-height: 1.3em; }
 .status.err { color: var(--miss); }
 .status.ok::before { content: "● "; color: var(--got); }
-.banner { background: var(--accent-soft); border-radius: 8px; padding: 10px 14px; font-size: 0.92rem; }
+.banner { background: var(--accent-soft); border-radius: 8px; padding: 10px 14px; font-size: 0.92rem; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; }
+.daynav { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.daynav select { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; min-width: 0; max-width: 100%; font-size: 0.9rem; }
+.daynav .hint { flex-basis: 100%; }
+details.day.viewing { border-color: var(--accent); }
+.openday { padding: 3px 10px; font-size: 0.8rem; margin-left: auto; }
 
 /* checklist */
 .sec-head { display: flex; justify-content: space-between; align-items: end; gap: 12px; flex-wrap: wrap; }
@@ -187,7 +192,7 @@ details.day[open] > summary::before { content: "▾"; }
     <section class="tiles" aria-label="Summary">
       <div class="tile"><span class="n" id="t-streak">–</span><span class="l">Current streak (days)</span></div>
       <div class="tile"><span class="n" id="t-best">–</span><span class="l">Best streak</span></div>
-      <div class="tile"><span class="n" id="t-today">–</span><span class="l">Checklist done today</span></div>
+      <div class="tile"><span class="n" id="t-today">–</span><span class="l" id="t-today-l">Checklist done today</span></div>
       <div class="tile"><span class="n" id="t-min">–</span><span class="l">Estimated minutes</span></div>
     </section>
     <nav class="jump" aria-label="Sections"><a href="#today">Today</a><a href="#progress">Progress</a><a href="#history">History</a></nav>
@@ -197,6 +202,13 @@ details.day[open] > summary::before { content: "▾"; }
   <section id="today" class="list" aria-labelledby="today-h">
     <div class="sec-head">
       <div><span class="eyebrow" id="today-eyebrow">Today</span><h2 id="today-h">Today's checklist</h2></div>
+      <div class="daynav" id="daynav" hidden>
+        <button type="button" data-nav="prev" id="nav-prev" aria-label="Earlier day">← Earlier</button>
+        <select id="day-pick" aria-label="Choose a day"></select>
+        <button type="button" data-nav="next" id="nav-next" aria-label="Later day">Later →</button>
+        <button type="button" class="primary" data-nav="unfinished" id="nav-unf">Next unfinished day</button>
+        <span class="hint" id="nav-hint"></span>
+      </div>
     </div>
     <div id="today-body" class="list">
       <p class="empty">Your set loads here. Each morning at 6:45 AM Central a new set of problems is written in, weighted toward your weakest topics.</p>
@@ -227,7 +239,7 @@ details.day[open] > summary::before { content: "▾"; }
 
   <section id="history" class="list" aria-labelledby="hist-h">
     <div><span class="eyebrow">History</span><h2 id="hist-h">Past days</h2></div>
-    <p class="hint">Open a day to retry its problems. Answers stay hidden until you ask for them.</p>
+    <p class="hint">"Do this day" loads a past day's full checklist at the top so you can complete it. Expand a day to retry single problems; answers stay hidden until you ask for them.</p>
     <div class="days" id="days"><p class="empty">Past days appear here after your first day.</p></div>
   </section>
 </div>
@@ -279,7 +291,7 @@ document.querySelector(".theme").addEventListener("click", (e) => {
 });
 
 /* ---------- state ---------- */
-const state = { db: null, days: new Map(), results: new Map(), resultsLoaded: false, daysLoaded: false, queue: [], meta: null, current: null, builtKey: "", openDays: new Set(), histReveal: new Set() };
+const state = { db: null, days: new Map(), results: new Map(), resultsLoaded: false, daysLoaded: false, queue: [], meta: null, current: null, selected: null, navSig: "", builtKey: "", openDays: new Set(), histReveal: new Set() };
 const writers = {};
 for (const [date, p] of Object.entries(store.get("tprep.pending") || {})) writers[date] = { pending: p, inflight: null, timer: 0, tries: 0 };
 
@@ -388,12 +400,53 @@ function unresolvedMissed() {
 }
 
 /* ---------- today ---------- */
-function pickCurrent() {
+/* The newest set (today's once it's written). */
+function latestDay() {
   const t = todayISO();
   if (state.days.has(t)) return t;
   const past = [...state.days.keys()].filter((d) => d <= t).sort();
   return past.length ? past[past.length - 1] : null;
 }
+/* The set shown in the checklist: a past day you opened, otherwise the newest one. */
+function pickCurrent() {
+  if (state.selected && state.days.has(state.selected)) return state.selected;
+  return latestDay();
+}
+function shownDays() { const t = todayISO(); return [...state.days.keys()].filter((d) => d <= t).sort(); }
+function selectDay(date, scroll = true) {
+  state.selected = date && date !== latestDay() ? date : null;
+  refresh();
+  if (scroll) requestAnimationFrame(() => $("today").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }));
+}
+function unfinishedDays() { const latest = latestDay(); return shownDays().filter((d) => d !== latest && !view(d).completed); }
+function renderDayNav() {
+  const days = shownDays(), nav = $("daynav");
+  nav.hidden = days.length < 2;
+  if (nav.hidden) return;
+  const cur = state.current, i = days.indexOf(cur), latest = latestDay();
+  const label = (d) => `${fmtDay(d)}${d === latest ? " (newest)" : ""} · ${view(d).completed ? "done" : doneCount(state.days.get(d), view(d)) + "/10"}`;
+  const sig = days.map(label).join("|") + "#" + cur;
+  const pick = $("day-pick");
+  if (sig !== state.navSig && document.activeElement !== pick) {
+    state.navSig = sig;
+    pick.innerHTML = [...days].reverse().map((d) => `<option value="${esc(d)}"${d === cur ? " selected" : ""}>${esc(label(d))}</option>`).join("");
+  }
+  $("nav-prev").disabled = i <= 0; $("nav-next").disabled = i < 0 || i >= days.length - 1;
+  const unf = unfinishedDays();
+  $("nav-unf").disabled = !unf.length || (unf.length === 1 && unf[0] === cur);
+  $("nav-hint").textContent = unf.length ? `${unf.length} past day${unf.length === 1 ? "" : "s"} not finished yet.` : "Every past day is finished.";
+}
+$("daynav").addEventListener("change", (e) => { if (e.target.id === "day-pick") selectDay(e.target.value, false); });
+$("daynav").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-nav]"); if (!b) return;
+  const days = shownDays(), i = days.indexOf(state.current);
+  if (b.dataset.nav === "prev" && i > 0) selectDay(days[i - 1], false);
+  else if (b.dataset.nav === "next" && i >= 0 && i < days.length - 1) selectDay(days[i + 1], false);
+  else if (b.dataset.nav === "unfinished") {
+    const unf = unfinishedDays().filter((d) => d !== state.current);
+    if (unf.length) selectDay(unf.find((d) => d > state.current) || unf[0]);
+  }
+});
 function probHTML(p, histDate) {
   const redo = p.redoOf ? `<span class="tag redo">Redo${p.redoFrom ? " from " + esc(fmtDay(p.redoFrom, { month: "short", day: "numeric" })) : ""}</span>` : "";
   const sub = p.sub ? ` · ${esc(p.sub)}` : "";
@@ -423,9 +476,12 @@ function buildToday() {
     $("today-eyebrow").textContent = "Today";
     return;
   }
-  const t = todayISO();
+  const t = todayISO(), latest = latestDay(), past = date !== latest;
   $("today-eyebrow").textContent = fmtDay(date, { weekday: "long", month: "long", day: "numeric" });
-  const banner = date !== t ? `<p class="banner">This is the set from ${esc(fmtDay(date))}. Today's set is written at 6:45 AM Central.</p>` : "";
+  $("today-h").textContent = past ? "Catch-up checklist" : "Today's checklist";
+  const banner = past
+    ? `<div class="banner"><span>You're doing the set from <b>${esc(fmtDay(date))}</b>. Everything you enter is saved to that day.</span><button type="button" data-act="back">Back to today's set</button></div>`
+    : date !== t ? `<p class="banner">This is the set from ${esc(fmtDay(date))}. Today's set is written at 6:45 AM Central.</p>` : "";
   const focus = (day.focus || []).length ? `<p class="focus">Focus today: <b>${day.focus.map(esc).join(", ")}</b>${day.note ? ". " + esc(day.note) : ""}</p>` : (day.note ? `<p class="focus">${esc(day.note)}</p>` : "");
   let html = banner + focus;
   for (const s of SECTIONS) {
@@ -545,6 +601,7 @@ $("today-body").addEventListener("click", (e) => {
     const f = () => { const s = Math.max(0, Math.ceil((end - Date.now()) / 1000)); $("s-clock").textContent = "0:" + String(s).padStart(2, "0"); if (s === 0) { $("s-clock").textContent = "1:00"; clearInterval(sTick); b.textContent = "Again"; } };
     f(); sTick = setInterval(f, 250); b.textContent = "Restart";
   } else if (act === "redo") queueMissed(unresolvedMissed(), $("redo-text"));
+  else if (act === "back") selectDay(null);
 });
 $("today-body").addEventListener("change", (e) => {
   const t = e.target, date = state.current;
@@ -586,6 +643,7 @@ function renderTiles() {
   $("t-streak").textContent = cur; $("t-best").textContent = best;
   const day = state.current && state.days.get(state.current);
   $("t-today").textContent = day ? `${doneCount(day, view(state.current))}/10` : "–";
+  $("t-today-l").textContent = state.current && state.current !== latestDay() ? `Checklist done for ${fmtDay(state.current, { month: "short", day: "numeric" })}` : "Checklist done today";
   $("t-min").textContent = day ? estMinutes(day) : "–";
   const m = state.meta;
   const bits = [];
@@ -653,7 +711,8 @@ function renderAcc() {
 
 /* ---------- history ---------- */
 function renderHistory() {
-  const days = [...state.days.values()].filter((d) => d.date !== state.current).sort((a, b) => b.date.localeCompare(a.date));
+  const latest = latestDay();
+  const days = [...state.days.values()].filter((d) => d.date !== latest && d.date <= todayISO()).sort((a, b) => b.date.localeCompare(a.date));
   const el = $("days");
   if (!days.length) { el.innerHTML = `<p class="empty">Past days appear here after your first day.</p>`; return; }
   el.innerHTML = days.map((day) => {
@@ -662,10 +721,12 @@ function renderHistory() {
     const z = ((v.items || {}).zetamac || {}).score, missed = probs.filter((p) => marks[p.id] === "missed" && retry[p.id] !== "got").length;
     const body = state.openDays.has(day.date) ? `<div class="day-body">${probs.map((p) => probHTML(p, day.date)).join("")}
       <div class="actions"><button type="button" data-hq="${esc(day.date)}" ${missed ? "" : "disabled"}>Queue this day's missed for tomorrow</button><span class="hint" data-hqmsg="${esc(day.date)}"></span></div></div>` : "";
-    return `<details class="day" data-date="${esc(day.date)}" ${state.openDays.has(day.date) ? "open" : ""}>
+    const viewing = day.date === state.current;
+    const openBtn = viewing ? `<span class="tag">Open above</span>` : `<button type="button" class="openday" data-openday="${esc(day.date)}">${v.completed ? "Open checklist" : "Do this day"}</button>`;
+    return `<details class="day${viewing ? " viewing" : ""}" data-date="${esc(day.date)}" ${state.openDays.has(day.date) ? "open" : ""}>
       <summary><span class="day-date">${esc(fmtDay(day.date))}</span>
         <span class="tag ${v.completed ? "got" : "plain"}">${v.completed ? "Complete" : doneCount(day, v) + "/10 done"}</span>
-        <span class="day-stats"><span>${got}/${marked.length} right</span>${missed ? `<span>${missed} to redo</span>` : ""}${z ? `<span>Zetamac ${z}</span>` : ""}</span></summary>${body}</details>`;
+        <span class="day-stats"><span>${got}/${marked.length} right</span>${missed ? `<span>${missed} to redo</span>` : ""}${z ? `<span>Zetamac ${z}</span>` : ""}</span>${openBtn}</summary>${body}</details>`;
   }).join("");
   el.querySelectorAll(".prob").forEach((c) => {
     const d = c.dataset.date, pid = c.dataset.pid, v = view(d), m = (v.marks || {})[pid], r = (v.retry || {})[pid];
@@ -684,6 +745,8 @@ $("days").addEventListener("toggle", (e) => {
   else if (!d.open && was) state.openDays.delete(d.dataset.date);
 }, true);
 $("days").addEventListener("click", (e) => {
+  const od = e.target.closest("[data-openday]");
+  if (od) { e.preventDefault(); selectDay(od.dataset.openday); return; }
   const hq = e.target.closest("[data-hq]");
   if (hq) {
     const date = hq.dataset.hq, day = state.days.get(date), ids = new Set((day.problems || []).map((p) => p.redoOf || p.id));
@@ -704,7 +767,7 @@ function refresh() {
   requestAnimationFrame(() => {
     refreshQueued = false;
     state.current = pickCurrent();
-    buildToday(); syncToday(); renderTiles(); renderAcc(); renderHistory(); renderZ();
+    buildToday(); syncToday(); renderDayNav(); renderTiles(); renderAcc(); renderHistory(); renderZ();
   });
 }
 if (window.ResizeObserver) { let w0 = 0; new ResizeObserver((en) => { const w = Math.round(en[0].contentRect.width); if (w !== w0) { w0 = w; renderZ(); } }).observe($("zchart")); }
@@ -731,3 +794,4 @@ if (anyPending()) setStatus("", "Unsaved entries from this device will sync when
   db.doc("meta/state").onSnapshot((s) => { state.meta = s.exists ? s.data() : null; refresh(); }, fail);
 })();
 </script>
+
