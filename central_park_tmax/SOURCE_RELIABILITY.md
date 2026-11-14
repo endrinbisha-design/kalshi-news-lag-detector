@@ -13,7 +13,7 @@ quantisation section — are deliberately frozen at what was known when the call
 and should not be refreshed. Everything else tracks the latest run.
 
 This document exists because on 09-11 I claimed the preliminary CLI had beaten the
-six-hour group and that "the ordering is reversed." **Tested across all 104 days, that is
+six-hour group and that "the ordering is reversed." **Tested across all 105 days, that is
 wrong.** The groups are settlement-grade and the preliminary is not.
 
 ## Clock labels after DST ends (2026-11-01)
@@ -38,10 +38,10 @@ sample before pooling it.
 
 | source | available | matches settlement |
 |---|---|---|
-| morning group (8 AM–2 PM) | 1:51 PM | 34/104 — **33 %** |
-| preliminary CLI | ~4:31–5:14 PM ‡ | 68/81 — **84 %** |
-| afternoon group (2 PM–8 PM) | 7:51 PM | 85/104 — **82 %** † |
-| **max of ALL same-day groups** | **7:51 PM** | **100/104 — 96 %** |
+| morning group (8 AM–2 PM) | 1:51 PM | 34/105 — **32 %** |
+| preliminary CLI | ~4:31–5:14 PM ‡ | 68/82 — **83 %** |
+| afternoon group (2 PM–8 PM) | 7:51 PM | 85/105 — **81 %** † |
+| **max of ALL same-day groups** | **7:51 PM** | **100/105 — 95 %** |
 
 ‡ **Not always.** On 2026-09-28 the preliminary was issued at **9:41 PM**, absent from
 both api.weather.gov and IEM AFOS through 5:47 PM — a real absence, not a feed miss. It
@@ -58,8 +58,8 @@ rather than measured.**
 It originally read "max of both groups" and was computed from the morning and afternoon
 groups only. 2026-09-14 broke it: an overnight-max day settling at 75, where morning
 (73.04) and afternoon (73.94) both round to 74, while the **2 AM–8 AM group reads 75.02**
-and was never consulted. Across the 104 days, daytime-only would miss **six** — 08-27, 09-14, 10-13, 10-17,
-10-27 and 11-06 (the 02-08 group alone read the 70 set at 1:06 AM LST) — where all-same-day-groups misses four. 10-13's maximum is in the 20-02 group, which spans
+and was never consulted. Across the 105 days, daytime-only would miss **seven** — 08-27, 09-14, 10-13, 10-17,
+10-27, 11-06 (the 02-08 group alone read the 70 set at 1:06 AM LST) and 11-13 (see below) — where all-same-day-groups misses four. 10-13's maximum is in the 20-02 group, which spans
 midnight local and is excluded by construction (see the 10-13 section). 10-17's is in **no group at all**:
 it was set at 12:08 AM LST, in the minutes before the 02-08 window opens (see the 10-17 section). 10-27's is the same family: 61 at 12:27 AM LST, in no group (see the 10-27 section). The 98 % was under-specified, not wrong; two
 of three available groups were going in, and no earlier day in the run stressed it.
@@ -258,7 +258,7 @@ It is not a one-off. Across the 49 days:
 
 | | days |
 |---|---|
-| afternoon group **exactly equals** the morning group | **22/104** — upper bound |
+| afternoon group **exactly equals** the morning group | **22/105** — upper bound |
 | …and also exceeds every snapshot inside its own window | **14** |
 
 Twelve exact ties, each landing precisely on the morning maximum, looked far more
@@ -984,6 +984,22 @@ the 10:51 ob (60) and the 11:18 SPECI (60). Point estimate exact. The ~5 % -1 ri
 16.1 C on the 60.98 F rounding edge) did not bite. The preliminary's minimum (52) was superseded by 47 at
 8:43 PM LST (evening rain), the second time in six days the preliminary low was not final (11-07, 11-12). A sixth
 between-obs peak in nine days. Below & flat is now n=14 {+0 ×11, +1 ×3}.
+
+**11-13: the preliminary and the final CLI disagreed by 5 F, the first time the preliminary was ABOVE the final.**
+A cold, rainy day (41-42 F by afternoon, NWS hourly 38-41 F) whose only possible high was in the first LST hour.
+The 20-02 six-hour group (excluded by construction, it spans days) read 11.1 C = 51.98 F, between the 23:51 and
+01:51 label obs (10.0, 10.6, then 8.9 C after a cold-front drop). The advance call recorded the mechanism and a
+judgement (52-53 ~50 %, 50-51 ~40 %, 49- ~10 %); the market priced 52-53 at ~80.5 %, 49- ~18.5 %, 50-51 ~3.5 %.
+The 16-day base rate (the 20-02 group beat the feed-banked value on 16 days since 08-02, the settled high was
+below it on all 16, above the feed-banked value on 2: 10-17, 10-27) said the settled high was almost never the
+group's value. The **preliminary** (4:33 PM EST) said **52 at 12:11 AM LST** — the 01:11-label peak, inside the
+Nov 13 day, exactly what the market priced. The **final** (1:25 AM EST Nov 14) said **47 at 1:11 AM LST**, *below*
+the feed's own 48.02 F ob at 12:51 AM LST and the 02-08 group's 8.9 C = 48.02 F: it behaves as if the first ~70
+minutes of the LST day had been removed. Minimum 38 at 9:23 AM in both; average 45 -> 43. Kalshi's KXHIGHNY-26NOV13
+was 'closed' with no result at 6:52 AM EST. The log holds the final CLI's 47 (the standing convention); if Kalshi
+settles on the preliminary's 52 or a corrected CLI, the entry must be revised. Consequences: (1) the preliminary is
+**not** a lower bound on the final; (2) on a first-LST-hour day the six-hour groups and the market read the
+preliminary's way and the final went the other way; (3) the 49-or-below bucket was the winner at ~18.5 %.
 
 
 ## A second zero-mass claim fell, for the same reason as the first — 2026-09-27

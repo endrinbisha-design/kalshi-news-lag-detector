@@ -41,7 +41,7 @@ sys.path.insert(0, str(ROOT / "src"))
 # edge into a +1.5 % one. Import the formula; do not retype it.
 from central_park_tmax.data.kalshi import kalshi_taker_fee  # noqa: E402
 
-UA = {"User-Agent": "central_park_tmax/0.1 (research; endrinsberisha@gmail.com)"}
+UA = {"User-Agent": "central_park_tmax/0.1 (research)"}
 START = dt.date(2026, 8, 1)
 SIX = re.compile(r"(?:^|\s)1([01])(\d{3})(?:\s|$)")
 # Fallback only: the preliminary as phrased in actual_high_source on pre-09-13 entries.
