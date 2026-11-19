@@ -210,7 +210,7 @@ the 17:00 candle on the day (now derived by the script, see below):
 ```
 
 37/37 correct (09-27's preliminary sat in an open-ended bucket, so it is not in this list),
-mean ask **98.1 ¢**, nineteen of them at exactly 100 ¢. Net **+2.5 % per bet**,
+mean ask **98.1 ¢**, twenty-two of them at exactly 100 ¢. Net **+2.5 % per bet**,
 +$9.10 on thirty-seven $10 stakes, before any slippage or depth check. That is `EDGE_DECAY.md`
 again — the same wall `PRELIM_FALLING` hit at exactly $1.00, just a whisker above zero
 instead of on it.
