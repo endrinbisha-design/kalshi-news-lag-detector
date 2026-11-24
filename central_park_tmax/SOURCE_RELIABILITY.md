@@ -13,7 +13,7 @@ quantisation section — are deliberately frozen at what was known when the call
 and should not be refreshed. Everything else tracks the latest run.
 
 This document exists because on 09-11 I claimed the preliminary CLI had beaten the
-six-hour group and that "the ordering is reversed." **Tested across all 114 days, that is
+six-hour group and that "the ordering is reversed." **Tested across all 115 days, that is
 wrong.** The groups are settlement-grade and the preliminary is not.
 
 ## Clock labels after DST ends (2026-11-01)
@@ -38,10 +38,10 @@ sample before pooling it.
 
 | source | available | matches settlement |
 |---|---|---|
-| morning group (8 AM–2 PM) | 1:51 PM | 36/114 — **32 %** |
-| preliminary CLI | ~4:31–5:14 PM ‡ | 76/91 — **84 %** |
-| afternoon group (2 PM–8 PM) | 7:51 PM | 93/114 — **82 %** † |
-| **max of ALL same-day groups** | **7:51 PM** | **108/114 — 95 %** |
+| morning group (8 AM–2 PM) | 1:51 PM | 37/115 — **32 %** |
+| preliminary CLI | ~4:31–5:14 PM ‡ | 77/92 — **84 %** |
+| afternoon group (2 PM–8 PM) | 7:51 PM | 94/115 — **82 %** † |
+| **max of ALL same-day groups** | **7:51 PM** | **109/115 — 95 %** |
 
 ‡ **Not always.** On 2026-09-28 the preliminary was issued at **9:41 PM**, absent from
 both api.weather.gov and IEM AFOS through 5:47 PM — a real absence, not a feed miss. It
@@ -58,7 +58,7 @@ rather than measured.**
 It originally read "max of both groups" and was computed from the morning and afternoon
 groups only. 2026-09-14 broke it: an overnight-max day settling at 75, where morning
 (73.04) and afternoon (73.94) both round to 74, while the **2 AM–8 AM group reads 75.02**
-and was never consulted. Across the 114 days, daytime-only would miss **eight** — 08-27, 09-14, 10-13, 10-17,
+and was never consulted. Across the 115 days, daytime-only would miss **eight** — 08-27, 09-14, 10-13, 10-17,
 10-27, 11-06 (the 02-08 group alone read the 70 set at 1:06 AM LST), 11-13 (see below) and 11-22 (a late-evening high, see below) — where all-same-day-groups misses six. 10-13's maximum is in the 20-02 group, which spans
 midnight local and is excluded by construction (see the 10-13 section). 10-17's is in **no group at all**:
 it was set at 12:08 AM LST, in the minutes before the 02-08 window opens (see the 10-17 section). 10-27's is the same family: 61 at 12:27 AM LST, in no group (see the 10-27 section). The 98 % was under-specified, not wrong; two
@@ -262,8 +262,8 @@ It is not a one-off. Across the 49 days:
 
 | | days |
 |---|---|
-| afternoon group **exactly equals** the morning group | **25/114** — upper bound |
-| …and also exceeds every snapshot inside its own window | **14** |
+| afternoon group **exactly equals** the morning group | **26/115** — upper bound |
+| …and also exceeds every snapshot inside its own window | **15** |
 
 Twelve exact ties, each landing precisely on the morning maximum, looked far more
 consistent with **a value being carried forward** than with twelve independent brief
@@ -815,8 +815,9 @@ interpolated 01:00–01:05 EDT value, not the banked max. The market priced exac
 | 11-19 | 63-64 ~29.5 % | ~71.5 % | 64 | market |
 | 11-20 | 68-69 ~73.5 % | ~98 % | 68 | market |
 | 11-21 | 64-65 ~69 % | ~90 % | 65 | market |
+| 11-23 | 68-69 ~70 % | ~96.5 % | 69 | market |
 
-Five of the eight market wins (the pool has three wins, 10-22, 11-04 and 11-05; 11-06, 11-08, 11-09, 11-10, 11-11, 11-15, 11-17, 11-18, 11-19, 11-20 and 11-21 made it nineteen market wins) were cases of the pool putting too much weight on a **+2 tail**; the other three (10-28, 10-29, 11-03) were on the +0 / +1 side.
+Five of the eight market wins (the pool has three wins, 10-22, 11-04 and 11-05; 11-06, 11-08, 11-09, 11-10, 11-11, 11-15, 11-17, 11-18, 11-19, 11-20, 11-21 and 11-23 made it twenty market wins) were cases of the pool putting too much weight on a **+2 tail**; the other three (10-28, 10-29, 11-03) were on the +0 / +1 side.
 The pool's first win was the market putting too little weight on the **ordinary +1
 excursion** between flat hourly reads on a clear, calm afternoon (10-15, 10-18, 10-21 and
 10-22 all did it). Those are different claims and are tracked separately. The practice
@@ -1100,6 +1101,18 @@ afternoon (59) and max-of-same-day (59) all missed it: the same blind spot as th
 the day. Point estimate off by 2, falsifier 1 hit, the market (14.5 %) closer than the pool (6 %) but ~10 points apart is
 not a table row. Below & flat is now n=16 {+0 ×11, +1 ×4, +2 ×1}. Preliminary error +2 now seen on 4 days. Kalshi's
 KXHIGHNY-26NOV13 still has no result on the morning of 11-23, ten days after the close.
+
+**11-23: a cold front after a plateau, the banked group value stood.** Warm, then gusty NW at 15:51 label: 68, 68, 66.02 F at
+13:51, 14:51 and 15:51 (falling 2 F), banked 69 from the 08-14 group (20.6 C = 69.08 F, above the hourly max 68) at the *top*
+of 68-69, below the morning group by 3 F and falling. The broad below&falling pool (n=30) put ~70 % on 68-69 and ~28 % on 70-71
+(the gap>=3 F subset, n=10, ~87 %); the 16:00 market ~96.5 %. It settled **69 at 1:39 PM LST = the 14:39 label**, +0: point
+estimate exact, the preliminary already said 69, the top-of-bucket boundary held (6 of 12 days since 11-04 crossed; held:
+11-06, 09, 10, 19, 21, 23), and the market won by ~26 points over the broad pool. The 14:39 peak sat between the 13:51 and
+14:51 obs (both 68) and was seen only by the six-hour groups, but the 08-14 group had already banked it at call time, so it
+adds nothing to the between-obs count. The afternoon group (20.6 C) exactly equals the morning group (duplicate, 26 of 115)
+and exceeds every hourly snapshot in its own window (15 days). The preliminary LOW (58 at 7:34 AM LST) was superseded by a
+later low, final 50 at 11:59 PM LST. Below & falling is now n=31 {-1 ×1, +0 ×22, +1 ×7, +2 ×1}; the gap>=3 subset n=11
+{-1 ×1, +0 ×10}. Kalshi's KXHIGHNY-26NOV13 still has no result on the morning of 11-24, eleven days after the close.
 
 ## A second zero-mass claim fell, for the same reason as the first — 2026-09-27
 
