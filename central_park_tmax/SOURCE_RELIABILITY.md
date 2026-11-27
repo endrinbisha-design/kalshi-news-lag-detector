@@ -13,7 +13,7 @@ quantisation section — are deliberately frozen at what was known when the call
 and should not be refreshed. Everything else tracks the latest run.
 
 This document exists because on 09-11 I claimed the preliminary CLI had beaten the
-six-hour group and that "the ordering is reversed." **Tested across all 117 days, that is
+six-hour group and that "the ordering is reversed." **Tested across all 118 days, that is
 wrong.** The groups are settlement-grade and the preliminary is not.
 
 ## Clock labels after DST ends (2026-11-01)
@@ -38,10 +38,10 @@ sample before pooling it.
 
 | source | available | matches settlement |
 |---|---|---|
-| morning group (8 AM–2 PM) | 1:51 PM | 37/117 — **32 %** |
-| preliminary CLI | ~4:31–5:14 PM ‡ | 79/94 — **84 %** |
-| afternoon group (2 PM–8 PM) | 7:51 PM | 95/117 — **81 %** † |
-| **max of ALL same-day groups** | **7:51 PM** | **110/117 — 94 %** |
+| morning group (8 AM–2 PM) | 1:51 PM | 37/118 — **31 %** |
+| preliminary CLI | ~4:31–5:14 PM ‡ | 79/95 — **83 %** |
+| afternoon group (2 PM–8 PM) | 7:51 PM | 95/118 — **81 %** † |
+| **max of ALL same-day groups** | **7:51 PM** | **110/118 — 93 %** |
 
 ‡ **Not always.** On 2026-09-28 the preliminary was issued at **9:41 PM**, absent from
 both api.weather.gov and IEM AFOS through 5:47 PM — a real absence, not a feed miss. It
@@ -58,8 +58,8 @@ rather than measured.**
 It originally read "max of both groups" and was computed from the morning and afternoon
 groups only. 2026-09-14 broke it: an overnight-max day settling at 75, where morning
 (73.04) and afternoon (73.94) both round to 74, while the **2 AM–8 AM group reads 75.02**
-and was never consulted. Across the 117 days, daytime-only would miss **nine** — 08-27, 09-14, 10-13, 10-17,
-10-27, 11-06 (the 02-08 group alone read the 70 set at 1:06 AM LST), 11-13 (see below), 11-22 (a late-evening high, see below) and 11-24 (a first-LST-hour 51 in no group) — where all-same-day-groups misses seven. 10-13's maximum is in the 20-02 group, which spans
+and was never consulted. Across the 118 days, daytime-only would miss **ten** — 08-27, 09-14, 10-13, 10-17,
+10-27, 11-06 (the 02-08 group alone read the 70 set at 1:06 AM LST), 11-13 (see below), 11-22 (a late-evening high, see below) and 11-24 (a first-LST-hour 51 in no group) and 11-26 (a late-evening 52, see below) — where all-same-day-groups misses eight. 10-13's maximum is in the 20-02 group, which spans
 midnight local and is excluded by construction (see the 10-13 section). 10-17's is in **no group at all**:
 it was set at 12:08 AM LST, in the minutes before the 02-08 window opens (see the 10-17 section). 10-27's is the same family: 61 at 12:27 AM LST, in no group (see the 10-27 section). The 98 % was under-specified, not wrong; two
 of three available groups were going in, and no earlier day in the run stressed it.
@@ -262,7 +262,7 @@ It is not a one-off. Across the 49 days:
 
 | | days |
 |---|---|
-| afternoon group **exactly equals** the morning group | **27/117** — upper bound |
+| afternoon group **exactly equals** the morning group | **27/118** — upper bound |
 | …and also exceeds every snapshot inside its own window | **15** |
 
 Twelve exact ties, each landing precisely on the morning maximum, looked far more
@@ -1136,6 +1136,19 @@ obs (both 42.98 F) and was seen only by the 14-20 group (7.2 C = 44.96 F): the e
 NWS hourly forecast said 47 F for 14:00-18:00 EST against 43 observed, 4 F warm (the day topped at 45). Below & flat is now
 n=17 {+0 ×11, +1 ×5, +2 ×1}. Kalshi's KXHIGHNY-26NOV13 still has no result on the morning of 11-26, thirteen days after the
 close.
+
+**11-26: a wet warm-sector evening, the bucket held and the point estimate missed by 8.** Cold, wet, NE 6-18 G42 KT, a flat 43
+from 03 to 15 label (rain from 10:51), banked 44 below the morning group (44) and rising 1 F. Every pool outcome (+0 to +3)
+lands in the 55- bucket, ~99 %; the 16:00 market put ~94.5 % on 55- and ~5.5 % on 56-57, pricing a warm front; the NWS
+hourly forecast rose 43 -> 56 (23h EST) through the evening. It settled **52 at 11:59 PM LST = the 00:59 label of 11-27, the last
+minute of the day**: 43 at 15:51 label to 51.98 F at the 00:51 label ob, nine hours of a rising warm-sector surge under
+E/NE winds. Point estimate 44 off by **8** (the largest in the log), the bucket right (52 <= 55), no trade made. The
+preliminary (4:48 PM EST, 44 at 11:47 AM) was superseded by a later high: **+8, the largest preliminary error in the log**.
+The 14-20 group was 7.8 C = 46 F; the 52 is in the 20-02 label group (spans days, excluded), so morning (44), afternoon
+(46) and max-of-same-day (46) all missed it: the second evening-high case after 11-22 (+2). The forecast was right in kind
+and 4 F warm in size (56 vs 52, after 47 vs 43 on 11-25). Below & rising is now n=11 {+0 ×5, +1 ×4, +4 ×1, +8 ×1}. On a wet
+E-wind warm-sector day the 'banked stands' estimate is a lower bound, not a point estimate. Kalshi's KXHIGHNY-26NOV13 still
+has no result on the morning of 11-27, fourteen days after the close.
 
 ## A second zero-mass claim fell, for the same reason as the first — 2026-09-27
 
